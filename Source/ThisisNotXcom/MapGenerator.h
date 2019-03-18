@@ -35,6 +35,10 @@ private:
 
 	AGrid* CombatGrid;
 
+	TWeakObjectPtr<AActor> OGFloor;
+
+	void SpawnFloor(const FVector& Position);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -55,7 +59,7 @@ public:
 		float BlockChance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
-		UInstancedStaticMeshComponent* Floor;
+		TSubclassOf<AActor> FloorClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
 		UInstancedStaticMeshComponent* ObstructingStructure;

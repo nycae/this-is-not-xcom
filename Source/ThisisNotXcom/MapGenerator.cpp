@@ -12,15 +12,25 @@ AMapGenerator::AMapGenerator()
 
 void AMapGenerator::PreGenerateGround()
 {
+	FVector SpawnPosition1;
+	FVector SpawnPosition2;
 	// Spawn floor and generate obstructed tiles
 	for (int i = 0; i < MapMaxX; i++) {
-		for (int j = 0; j < MapMaxY; j++) {
-			Floor->AddInstance(FTransform(FVector(float(i * TileSize), float(j * TileSize), -10.0)));
+		for (int j = 0; j < MapMaxY - i; j++) {
+
+			SpawnPosition1 = FVector(float(i * TileSize), float(j * TileSize), -10.0);
+			SpawnPosition2 = FVector(float(((MapMaxX - 1) - i) * TileSize), float(((MapMaxY - 1) - j) * TileSize), -10.0);
+
+			SpawnFloor(SpawnPosition1); 
+			SpawnFloor(SpawnPosition2);
+
 			if (BlockChance > FMath::FRandRange(0.0, 1.0)) {
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Obstructed);
+				CombatGrid->AddAtCoordinates(((MapMaxX - 1) - i), ((MapMaxY - 1) - j), ETileState::TS_Obstructed);
 			}
 			else {
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Empty);
+				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Empty);
 			}
 		}
 	}
@@ -97,3 +107,20 @@ void AMapGenerator::Tick(float DeltaTime)
 
 }
 
+void AMapGenerator::SpawnFloor(const FVector& Position)
+{
+	if (!OGFloor.IsValid()) {
+		OGFloor = GetWorld()->SpawnActor(FloorClass, &Position);
+	}
+	else {
+
+		FActorSpawnParameters	Parameters;
+		FVector					TruePosition(Position);
+		FRotator				Rotator(0, 0, 0);
+
+		Parameters.Template	=	OGFloor.Get();
+		TruePosition.Z		+=	10.0;
+
+		GetWorld()->SpawnActor(FloorClass, &TruePosition, &Rotator, Parameters);
+	}
+}

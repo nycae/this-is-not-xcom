@@ -35,13 +35,19 @@ public:
 		void AddAtPosition(const FPosition& Position, const ETileState& State);
 
 	UFUNCTION(BlueprintCallable)
-		bool IsEmpty(const FPosition& Position) const;
+		bool isEmpty(const FPosition& Position) const;
+
+	UFUNCTION(BlueprintCallable)
+		bool isObstructed(const FPosition& Position) const;
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FPosition> GetObstructedPositions() const;
 
 	UFUNCTION(BlueprintCallable)
 		void SetSpawnPoint(const FPosition& Position);
+
+	UFUNCTION(BlueprintCallable)
+		void FreeCoordinate(const FPosition& Position);
 
 private:
 

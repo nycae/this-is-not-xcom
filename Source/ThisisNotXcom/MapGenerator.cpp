@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MapGenerator.h"
+#include "AStar.h"
 #include "Engine.h"
 
 // Sets default values
@@ -24,9 +25,9 @@ void AMapGenerator::PreGenerateGround()
 			SpawnFloor(SpawnPosition1); 
 			SpawnFloor(SpawnPosition2);
 
-			if (BlockChance > FMath::FRandRange(0.0, 1.0)) {
+			if (BlockChance / 2.0 > FMath::FRandRange(0.0, 1.0)) {
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Obstructed);
-				CombatGrid->AddAtCoordinates(((MapMaxX - 1) - i), ((MapMaxY - 1) - j), ETileState::TS_Obstructed);
+				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Obstructed);
 			}
 			else {
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Empty);
@@ -54,7 +55,9 @@ void AMapGenerator::SetPlayerTroops()
 					CombatGrid->SetSpawnPoint(FPosition(i, j));
 					CombatGrid->SetSpawnPoint(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
 					break;
-				default: 
+				default:
+					CombatGrid->FreeCoordinate(FPosition(i, j));
+					CombatGrid->FreeCoordinate(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
 					break;
 			}
 		}
@@ -64,6 +67,15 @@ void AMapGenerator::SetPlayerTroops()
 void AMapGenerator::FixGround()
 {
 	// Find a path in the grid
+	for (int32 i = 2; i < FMath::Min(MapMaxX, MapMaxY); i++) {
+		CombatGrid->FreeCoordinate(FPosition(i, i));
+		CombatGrid->FreeCoordinate(FPosition(i + 1, i));
+		
+		CombatGrid->FreeCoordinate(FPosition(i - 1, i));
+		CombatGrid->FreeCoordinate(FPosition(i, i + 1));
+		CombatGrid->FreeCoordinate(FPosition(i, i - 1));
+
+	}
 }
 
 void AMapGenerator::GenerateGround()
@@ -89,13 +101,14 @@ void AMapGenerator::FindGrid()
 // Called when the game starts or when spawned
 void AMapGenerator::BeginPlay()
 {
-	Super::BeginPlay();
+	AActor::BeginPlay();
 
 	FindGrid();
 
 	PreGenerateGround();
 
-	FixGround();
+	if (!AStar(CombatGrid, MapMaxX, MapMaxY).isPossiblePathExisting(FPosition(0, 0)))
+		FixGround();
 
 	GenerateGround();
 }
@@ -103,7 +116,7 @@ void AMapGenerator::BeginPlay()
 // Called every frame
 void AMapGenerator::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	AActor::Tick(DeltaTime);
 
 }
 

@@ -18,11 +18,21 @@ void AGrid::AddAtCoordinates(const int32& Row, const int32& Column, const ETileS
 	return AddAtPosition(FPosition(Row, Column), State);
 }
 
-bool AGrid::IsEmpty(const FPosition& Position) const
+bool AGrid::isEmpty(const FPosition& Position) const
 {
 	if (Tiles.Contains(Position))
 		if (Tiles[Position]->State == ETileState::TS_Empty)
 			return true;
+
+	return false;
+}
+
+bool AGrid::isObstructed(const FPosition& Position) const
+{
+	if (Tiles.Contains(Position))
+		if (Tiles[Position]->State == ETileState::TS_Obstructed)
+			return true;
+	
 
 	return false;
 }
@@ -54,4 +64,10 @@ void AGrid::SetSpawnPoint(const FPosition& Position)
 {
 	if (Tiles.Contains(Position))
 		Tiles[Position]->State = ETileState::TS_Occupied;
+}
+
+void AGrid::FreeCoordinate(const FPosition& Position)
+{
+	if (Tiles.Contains(Position))
+		Tiles[Position]->State = ETileState::TS_Empty;
 }

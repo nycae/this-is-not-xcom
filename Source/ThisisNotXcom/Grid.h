@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void FreeCoordinate(const FPosition& Position);
 
+	UFUNCTION(BlueprintCallable)
+		void OccupiedBy(const FPosition& Position, ATrooper* Occupant);
+
 private:
 
 	TMap<FPosition, ATile*> Tiles;

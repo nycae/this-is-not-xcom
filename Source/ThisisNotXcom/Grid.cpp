@@ -71,3 +71,11 @@ void AGrid::FreeCoordinate(const FPosition& Position)
 	if (Tiles.Contains(Position))
 		Tiles[Position]->State = ETileState::TS_Empty;
 }
+
+void AGrid::OccupiedBy(const FPosition& Position, ATrooper* Occupant)
+{
+	if (Tiles.Contains(Position)) {
+		Tiles[Position]->State = ETileState::TS_Occupied;
+		Tiles[Position]->Ocupant = Occupant;
+	}
+}

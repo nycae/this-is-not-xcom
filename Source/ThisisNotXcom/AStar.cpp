@@ -57,17 +57,12 @@ AStar::AStar(AGrid* Grid, const int32& MapMaxX, const int32& MapMaxY)
 bool AStar::isPossiblePathExisting(const FPosition& InitialState)
 {
 	State StateBuffer;
-	FString Mensaje = "Tamaño del array = "; Mensaje.AppendInt(Visited.Num());
 
 	StateCollection.HeapPush(State(InitialState), StatePredicate());
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, Mensaje);
-
-
 	while ( StateCollection.Num() > 0 ) {
-		StateCollection.HeapPop(StateBuffer, StatePredicate());
 
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Exploring " + StateBuffer.ToString()) );
+		StateCollection.HeapPop(StateBuffer, StatePredicate());
 
 		Visited[StateBuffer.GetIndex(MaxX)] = true;
 
@@ -94,11 +89,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	State LowerNeighbourState(LowerNeighbour);
 
 	if ((int64)RightNeighbourState.GetIndex(MaxX) < Visited.Num())
-	{	/*
-		FString Index = "Index = "; Index.AppendInt(RightNeighbourState.GetIndex(MaxX));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, Index);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, RightNeighbourState.ToString());
-		*/
+	{	
 		if (!Visited[RightNeighbourState.GetIndex(MaxX)]
 			&&
 			!BattleGrid->isObstructed(RightNeighbour))
@@ -109,11 +100,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	}
 	
 	if (LeftNeighbour.Row > 0)
-	{	/*
-		FString Index = "Index = "; Index.AppendInt(LeftNeighbourState.GetIndex(MaxX));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, Index);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, LeftNeighbourState.ToString());
-		*/
+	{
 		if (!Visited[LeftNeighbourState.GetIndex(MaxX)]
 			&&
 			!BattleGrid->isObstructed(LeftNeighbour))
@@ -123,11 +110,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	}
 
 	if ((int64)UpperNeighbourState.GetIndex(MaxX) < Visited.Num()) 
-	{	/*
-		FString Index = "Index = "; Index.AppendInt(UpperNeighbourState.GetIndex(MaxX));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, Index);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, UpperNeighbourState.ToString());
-		*/
+	{
 		if (!Visited[UpperNeighbourState.GetIndex(MaxX)]
 			&&
 			!BattleGrid->isObstructed(UpperNeighbour)) 
@@ -138,11 +121,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	}
 	
 	if ((int64)LowerNeighbour.Column > 0 )
-	{	/*
-		FString Index = "Index = "; Index.AppendInt(LowerNeighbourState.GetIndex(MaxX));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, Index);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, LowerNeighbourState.ToString());
-		*/
+	{
 		if (!Visited[LowerNeighbourState.GetIndex(MaxX)]
 			&&
 			!BattleGrid->isObstructed(LowerNeighbour))

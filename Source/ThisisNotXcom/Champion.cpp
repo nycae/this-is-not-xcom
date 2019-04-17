@@ -4,6 +4,7 @@
 
 void AChampion::Move(const FPosition& Position) const
 {
+
 }
 
 void AChampion::Attack(const FPosition& Position) const

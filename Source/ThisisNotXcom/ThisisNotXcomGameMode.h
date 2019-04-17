@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScoreManager.h"
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
 
@@ -12,7 +13,14 @@ class AThisisNotXcomGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+
 	AThisisNotXcomGameMode();
+
+	void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite)
+		UScoreManager* ScoreManager;
+
 };
 
 

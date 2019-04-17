@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 #include "Position.h"
 #include "Trooper.generated.h"
 
 UCLASS()
-class THISISNOTXCOM_API ATrooper : public APawn
+class THISISNOTXCOM_API ATrooper : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -39,4 +39,6 @@ public:
 
 	virtual void Attack(const FPosition& Position) const;
 
+	UPROPERTY(BlueprintReadWrite)
+		float Speed = 0.0f;
 };

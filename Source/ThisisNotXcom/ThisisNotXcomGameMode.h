@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
+#include "TeamLeader.h"
 #include "ScoreManager.h"
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
 
-UCLASS(minimalapi)
+UCLASS()
 class AThisisNotXcomGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
@@ -21,6 +22,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		UScoreManager* ScoreManager;
 
+	UPROPERTY(BlueprintReadWrite)
+		UTeamLeader* PlayerOne;
+
+	UPROPERTY(BlueprintReadWrite)
+		UTeamLeader* PlayerTwo;
 };
 
 

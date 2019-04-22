@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "UserScore.h"
 #include "UObject/NoExportTypes.h"
 #include "ScoreManager.generated.h"

@@ -64,10 +64,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
 		UInstancedStaticMeshComponent* ObstructingStructure;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Troop Class")
-		TSubclassOf<APawn> RegularClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Champion Class")
-		TSubclassOf<APawn> SpecialClass;
-
 };

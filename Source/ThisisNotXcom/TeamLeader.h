@@ -20,18 +20,11 @@ class THISISNOTXCOM_API UTeamLeader : public UPlayer
 	
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Units")
-		TSubclassOf<AActor> PawnUnitClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		int32 Score = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Units")
-		TSubclassOf<AActor> ChampionUnitClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-		AGrid* CombatGrid;
-
-	void SpawnPawnAt(const FPosition& Position);
-
-	void SpawnChampionAt(const FPosition& Position);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Name")
+		FString PlayerName;
 
 private:
 

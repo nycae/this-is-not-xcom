@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Direction.h"
 #include "GameFramework/Character.h"
 #include "Position.h"
 #include "Trooper.generated.h"
@@ -28,6 +29,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+		FVector GetVectorFromDirection(EDirectionEnum Direction) const;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -39,6 +43,9 @@ public:
 
 	virtual void Attack(const FPosition& Position) const;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Speed = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite)
+		EDirectionEnum Facing = EDirectionEnum::DE_Forward;
 };

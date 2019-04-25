@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Core.h"
-#include "TeamLeader.h"
+#include "Team.h"
 #include "ScoreManager.h"
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
@@ -23,10 +23,10 @@ public:
 		UScoreManager* ScoreManager;
 
 	UPROPERTY(BlueprintReadWrite)
-		UTeamLeader* PlayerOne;
+		UTeam* PlayerOne;
 
 	UPROPERTY(BlueprintReadWrite)
-		UTeamLeader* PlayerTwo;
+		UTeam* PlayerTwo;
 };
 
 

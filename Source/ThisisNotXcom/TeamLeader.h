@@ -26,10 +26,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Name")
 		FString PlayerName;
 
-private:
-
-	TArray<TWeakObjectPtr<AChampion>, TFixedAllocator<3>> Champions;
-
-	TArray<TWeakObjectPtr<APawnTrooper>, TFixedAllocator<5>> Pawns;
-
 };

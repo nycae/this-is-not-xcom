@@ -2,6 +2,7 @@
 
 #include "ThisisNotXcomGameMode.h"
 #include "Engine/World.h"
+#include "ThisisNotXcomGameState.h"
 #include "ThisisNotXcomCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -16,6 +17,8 @@ AThisisNotXcomGameMode::AThisisNotXcomGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	//GameStateClass = AThisisNotXcomGameState::StaticClass();
 }
 
 void AThisisNotXcomGameMode::BeginPlay()

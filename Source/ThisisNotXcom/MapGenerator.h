@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
+#include "TroopManager.h"
 #include "Grid.h"
 #include "GameFramework/Actor.h"
 #include "MapGenerator.generated.h"
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Characteristics")
 		float BlockChance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Units")
+		UTroopManager* TroopManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
 		TSubclassOf<AActor> FloorClass;

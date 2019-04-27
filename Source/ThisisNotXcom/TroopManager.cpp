@@ -1,18 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TroopManager.h"
+#include "Engine.h"
+#include "Engine/Engine.h"
+#include "EngineGlobals.h"
 
-ATroopManager::ATroopManager()
-{
-	PrimaryActorTick.bCanEverTick = false;
-}
-
-void ATroopManager::BeginPlay()
+UTroopManager::UTroopManager()
 {
 
 }
 
-void ATroopManager::Tick(float DeltaTime)
+void UTroopManager::SpawnPawnAt(const FVector& Position)
 {
-	AActor::Tick(DeltaTime);
+	GetWorld()->SpawnActor(PawnClass, &Position);
 }

@@ -10,21 +10,18 @@
  * 
  */
 UCLASS()
-class THISISNOTXCOM_API ATroopManager : public AActor
+class THISISNOTXCOM_API UTroopManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:
 
-	ATroopManager();
+	UTroopManager();
 
-protected:
-
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+		void SpawnPawnAt(const FVector& Position);
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Troop Classes")
 		TSubclassOf<AActor> PawnClass;

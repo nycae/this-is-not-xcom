@@ -5,12 +5,43 @@
 #include "Engine/Engine.h"
 #include "EngineGlobals.h"
 
-UTroopManager::UTroopManager()
+ATroopManager::ATroopManager()
 {
-
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-void UTroopManager::SpawnPawnAt(const FVector& Position)
+void ATroopManager::Tick(float DeltaTime)
 {
-	GetWorld()->SpawnActor(PawnClass, &Position);
+	AActor::Tick(DeltaTime);
+}
+
+void ATroopManager::BeginPlay()
+{
+	AActor::BeginPlay();
+}
+
+AActor* ATroopManager::SpawnPawnAt(const FVector& Position)
+{
+	if (!PawnClass) 
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no pawn class");
+		return nullptr;
+	}
+	else
+	{
+		return GetWorld()->SpawnActor(PawnClass, &Position);
+	}
+}
+
+AActor* ATroopManager::SpawnChampionAt(const FVector& Position)
+{
+	if (!PawnClass)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no pawn class");
+		return nullptr;
+	}
+	else
+	{
+		return GetWorld()->SpawnActor(ChampionClass, &Position);
+	}
 }

@@ -8,6 +8,16 @@
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
 
+UENUM(BlueprintType)
+enum class EGameState : uint8
+{
+	GS_Init				UMETA(DisplayName="Initializing"),
+	GS_PlayerOneTurn	UMETA(DisplayName="Player One Turn"),
+	GS_PlayerTwoTurn	UMETA(DisplayName="Player Two Turn"),
+	GS_Ending			UMETA(DisplayName="Ending"),
+	GS_MAX				UMETA(DisplayName="MAX")
+};
+
 UCLASS()
 class AThisisNotXcomGameMode : public AGameModeBase
 {

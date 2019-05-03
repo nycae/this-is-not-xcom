@@ -6,6 +6,7 @@
 #include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "TroopManager.h"
 #include "Grid.h"
+#include "ThisisNotXComGameMode.h"
 #include "GameFramework/Actor.h"
 #include "MapGenerator.generated.h"
 
@@ -26,6 +27,10 @@ private:
 
 	void FindGrid();
 
+	void FindTroopManager();
+
+	void FindGameMode();
+
 	void PreGenerateGround();
 
 	void SetPlayerTroops();
@@ -34,7 +39,11 @@ private:
 
 	void GenerateGround();
 
-	AGrid* CombatGrid;
+	TWeakObjectPtr<AThisisNotXcomGameMode> GameMode;
+
+	TWeakObjectPtr<AGrid> CombatGrid;
+
+	TWeakObjectPtr<ATroopManager> TroopManager;
 
 	TWeakObjectPtr<AActor> OGFloor;
 
@@ -58,9 +67,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Characteristics")
 		float BlockChance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Units")
-		UTroopManager* TroopManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
 		TSubclassOf<AActor> FloorClass;

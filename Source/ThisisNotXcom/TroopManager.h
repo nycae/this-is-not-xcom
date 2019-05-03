@@ -10,16 +10,25 @@
  * 
  */
 UCLASS()
-class THISISNOTXCOM_API UTroopManager : public UObject
+class THISISNOTXCOM_API ATroopManager : public AActor
 {
 	GENERATED_BODY()
 	
+protected:
+
+	virtual void BeginPlay() override;
+
 public:
 
-	UTroopManager();
+	ATroopManager();
 
 	UFUNCTION(BlueprintCallable)
-		void SpawnPawnAt(const FVector& Position);
+		AActor* SpawnPawnAt(const FVector& Position);
+
+	UFUNCTION(BlueprintCallable)
+		AActor* SpawnChampionAt(const FVector& Position);
+
+	virtual void Tick(float DeltaTime) override;
 
 public:
 

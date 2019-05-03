@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "TeamLeader.h"
-#include "UObject/NoExportTypes.h"
+#include "Champion.h"
+#include "PawnTrooper.h"
+#include "GameFramework/Actor.h"
 #include "Team.generated.h"
 
 /**
@@ -17,13 +19,21 @@ class THISISNOTXCOM_API UTeam : public UObject
 	
 public:
 
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Player")
-		TWeakObjectPtr<UTeamLeader>									Leader;
+	UTeam();
 
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Army")
-		TArray<TWeakObjectPtr<AChampion>, TFixedAllocator<3>>		Champions;
+	void AddChampion(AChampion* Champion);
 
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Army")
-		TArray<TWeakObjectPtr<APawnTrooper>, TFixedAllocator<5>>	Pawns;
+	void AddPawn(APawnTrooper* Pawn);
+
+public:
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Player")
+		ATeamLeader*			Leader;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Army")
+		TArray<ATrooper*>		Champions;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Army")
+		TArray<ATrooper*>	Pawns;
 
 };

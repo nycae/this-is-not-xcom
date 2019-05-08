@@ -24,7 +24,7 @@ AActor* ATroopManager::SpawnPawnAt(const FVector& Position)
 {
 	if (!PawnClass) 
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no pawn class");
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "No pawn class");
 		return nullptr;
 	}
 	else
@@ -35,9 +35,9 @@ AActor* ATroopManager::SpawnPawnAt(const FVector& Position)
 
 AActor* ATroopManager::SpawnChampionAt(const FVector& Position)
 {
-	if (!PawnClass)
+	if (!ChampionClass)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no pawn class");
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "No champion class");
 		return nullptr;
 	}
 	else

@@ -3,14 +3,8 @@
 #include "PawnTrooper.h"
 
 
-APawnTrooper::APawnTrooper() : Super() 
+APawnTrooper::APawnTrooper()
 {
-}
-
-void APawnTrooper::Move(const FPosition& Position) const
-{
-}
-
-void APawnTrooper::Attack(const FPosition& Position) const
-{
+	MaxAttackDepth = 1;
+	MaxMoveDepth = 2;
 }

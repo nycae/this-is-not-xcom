@@ -4,14 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Tile.h"
 #include "Camera/CameraComponent.h"
 #include "TeamLeader.generated.h"
 
 class AThisisNotXcomGameMode;
-
-constexpr char* DefaultPlayerOneName = "PlayerOne";
-
-constexpr char* DefaultPlayerTwoName = "PlayerTwo";
 
 UCLASS()
 class THISISNOTXCOM_API ATeamLeader : public APawn
@@ -42,13 +39,32 @@ public:
 
 	void RotateRight(float Value);
 
+	void OnClick();
+
+	void HideCursor();
+
+	void DisplayCursor();
+
 private:
 
 	UCameraComponent* Camera;
 
 	AThisisNotXcomGameMode* GameMode;
 
+	TWeakObjectPtr<ATile> SelectedTile = nullptr;
+
+	TWeakObjectPtr<AGrid> CombatGrid;
+
+	bool bIsInLookMode;
+
+	bool bIsTurnMoveDone;
+
+	bool bIsTurnAttackDone;
+
 public:
+
+	UFUNCTION(BlueprintCallable)
+		void OnNewTurn();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
 		int32 Score = 0;

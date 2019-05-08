@@ -3,19 +3,22 @@
 #pragma once
 
 #include "Core.h"
-#include "Team.h"
+#include "TeamLeader.h"
 #include "ScoreManager.h"
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
 
+constexpr char* DefaultPlayerOneName = "PlayerOne";
+constexpr char* DefaultPlayerTwoName = "PlayerTwo";
+
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {
-	GS_Init				UMETA(DisplayName="Initializing"),
-	GS_PlayerOneTurn	UMETA(DisplayName="Player One Turn"),
-	GS_PlayerTwoTurn	UMETA(DisplayName="Player Two Turn"),
-	GS_Ending			UMETA(DisplayName="Ending"),
-	GS_MAX				UMETA(DisplayName="MAX")
+	GS_Init			UMETA(DisplayName="Initializing"),
+	GS_PlayerTurn	UMETA(DisplayName="Player One Turn"),
+	GS_TurnSwap		UMETA(DisplayName="Turn Swap"),
+	GS_Ending		UMETA(DisplayName="Ending"),
+	GS_MAX			UMETA(DisplayName="MAX")
 };
 
 UCLASS()
@@ -27,16 +30,33 @@ public:
 
 	AThisisNotXcomGameMode();
 
-	void BeginPlay() override;
+	virtual void BeginPlay() override;
+
+	void RegisterTeam(ATeamLeader* NewTeam);
+
+	UFUNCTION(BlueprintCallable)
+		void InitFinished();
+
+	UFUNCTION(BlueprintCallable)
+		void OnEndOfTurn();
+
+private:
+
+	EGameState State;
+
+	//TCircularQueue<ATeamLeader*> Teams;	/* No appropriate default constructor available */
+	TArray<ATeamLeader*> Teams;
+
+	int16 TurnHolder;
+
+public:
 
 	UPROPERTY(BlueprintReadWrite)
 		UScoreManager* ScoreManager;
 
-	UPROPERTY(BlueprintReadWrite)
-		UTeam* PlayerOne;
+	UFUNCTION(BlueprintCallable)
+		ATeamLeader* GetTeamAt(uint8 Index);
 
-	UPROPERTY(BlueprintReadWrite)
-		UTeam* PlayerTwo;
 };
 
 

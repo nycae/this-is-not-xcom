@@ -18,10 +18,4 @@ public:
 
 	APawnTrooper();
 
-	UFUNCTION(BlueprintCallable)
-		virtual void Move(const FPosition& Position) const override;
-	
-	UFUNCTION(BlueprintCallable)
-		virtual void Attack(const FPosition& Position) const override;
-
 };

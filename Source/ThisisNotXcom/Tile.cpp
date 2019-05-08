@@ -7,7 +7,7 @@ ATile::ATile()
 	: Ocupant(nullptr), State(ETileState::TS_Empty), bIsSelected(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 // Called when the game starts or when spawned
@@ -24,3 +24,20 @@ void ATile::Tick(float DeltaTime)
 
 }
 
+void ATile::OnClick()
+{
+	if (bIsSelected)
+	{
+		bIsSelected = false;
+	}
+	else
+	{
+		bIsSelected = true;
+	}
+}
+
+void ATile::EndTurn()
+{
+	bIsSelected = false;
+
+}

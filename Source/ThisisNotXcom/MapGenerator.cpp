@@ -16,6 +16,10 @@ void AMapGenerator::PreGenerateGround()
 {
 	FVector SpawnPosition1;
 	FVector SpawnPosition2;
+
+	ATile* TileBuffer1;
+	ATile* TileBuffer2;
+
 	// Spawn floor and generate obstructed tiles
 	for (int i = 0; i < MapMaxX; i++) 
 	{
@@ -25,31 +29,25 @@ void AMapGenerator::PreGenerateGround()
 			SpawnPosition1 = FVector(float(i * TileSize), float(j * TileSize), -60.0);
 			SpawnPosition2 = FVector(float(((MapMaxX - 1) - i) * TileSize), float(((MapMaxY - 1) - j) * TileSize), -60.0);
 
-			SpawnFloor(SpawnPosition1); 
-			SpawnFloor(SpawnPosition2);
+			TileBuffer1 = SpawnFloor(SpawnPosition1); 
+			TileBuffer2 = SpawnFloor(SpawnPosition2);
 
 			if (BlockChance / 2.0 > FMath::FRandRange(0.0, 1.0)) 
 			{
-				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Obstructed);
-				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Obstructed);
+				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Obstructed, TileBuffer1);
+				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Obstructed, TileBuffer2);
 			}
 			else 
 			{
-				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Empty);
-				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Empty);
+				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Empty, TileBuffer1);
+				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Empty, TileBuffer2);
 			}
 		}
 	}
-
-	SetPlayerTroops();
 }
 
 void AMapGenerator::SetPlayerTroops()
 {
-	AActor* TrooperBuffer;
-	FRotator Team2TroopRotation = {0.0f, 180.f, 0.0f};
-
-	/* Spawn troops */
 	for (int i = 0; i < 3; i++) 
 	{
 		for (int j = 0; j < 3; j++) 
@@ -58,27 +56,13 @@ void AMapGenerator::SetPlayerTroops()
 			{
 				case 0: case 1: /* Spawn Champion */ 
 					// Create Champion
-					TrooperBuffer = TroopManager->SpawnChampionAt(FVector(i * TileSize, j * TileSize, 0));
 					CombatGrid->SetSpawnPoint(FPosition(i, j));
-					GameMode->PlayerOne->AddChampion(Cast<AChampion>(TrooperBuffer));
-					
-					TrooperBuffer = TroopManager->SpawnChampionAt(FVector(((MapMaxX - 1) - i) * TileSize, ((MapMaxY - 1) - j) * TileSize, 0));
-					TrooperBuffer->SetActorRotation(Team2TroopRotation);
-					((ATrooper*)TrooperBuffer)->Facing = EDirectionEnum::DE_Backward;
 					CombatGrid->SetSpawnPoint(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
-					GameMode->PlayerTwo->AddChampion(Cast<AChampion>(TrooperBuffer));
 					break;
 				case 2: case 3: /* Spawn Regular */ 
 					// Create Pawn
-					TrooperBuffer = TroopManager->SpawnPawnAt(FVector(i * TileSize, j * TileSize, 0));
 					CombatGrid->SetSpawnPoint(FPosition(i, j));
-					GameMode->PlayerOne->AddPawn(Cast<APawnTrooper>(TrooperBuffer));
-
-					TrooperBuffer = TroopManager->SpawnPawnAt(FVector(((MapMaxX - 1) - i) * TileSize, ((MapMaxY - 1) - j) * TileSize, 0));
-					TrooperBuffer->SetActorRotation(Team2TroopRotation);
-					((ATrooper*) TrooperBuffer)->Facing = EDirectionEnum::DE_Backward;
 					CombatGrid->SetSpawnPoint(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
-					GameMode->PlayerTwo->AddPawn(Cast<APawnTrooper>(TrooperBuffer));
 					break;
 				default:
 					CombatGrid->FreeCoordinate(FPosition(i, j));
@@ -95,9 +79,10 @@ void AMapGenerator::FixGround()
 	for (int32 i = 2; i < FMath::Min(MapMaxX, MapMaxY); i++) 
 	{
 		CombatGrid->FreeCoordinate(FPosition(i, i));
+
 		CombatGrid->FreeCoordinate(FPosition(i + 1, i));
-		
 		CombatGrid->FreeCoordinate(FPosition(i - 1, i));
+
 		CombatGrid->FreeCoordinate(FPosition(i, i + 1));
 		CombatGrid->FreeCoordinate(FPosition(i, i - 1));
 	}
@@ -120,6 +105,7 @@ void AMapGenerator::FindGrid()
 	verify(Grids.Num() > 0);
 
 	CombatGrid = Cast<AGrid>(Grids[0]);
+
 }
 
 void AMapGenerator::FindTroopManager()
@@ -130,6 +116,7 @@ void AMapGenerator::FindTroopManager()
 	verify(TroopManagers.Num() > 0);
 
 	TroopManager = Cast<ATroopManager>(TroopManagers[0]);
+
 }
 
 void AMapGenerator::FindGameMode()
@@ -137,6 +124,90 @@ void AMapGenerator::FindGameMode()
 	GameMode = Cast<AThisisNotXcomGameMode>(GetWorld()->GetAuthGameMode());
 
 	verify(GameMode.Get() != nullptr);
+
+}
+
+void AMapGenerator::SpawnTeamLeaders()
+{
+	TeamManager = GetWorld()->SpawnActor<ATeamManager>();
+
+	/* Doesn't work, don't know why
+	for (uint8 TeamCounter = 0; TeamCounter < TeamManager->NumberOfTeams; TeamCounter++)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Cyan, FString::Printf(TEXT("Spawning player %d"), TeamCounter + 1	));
+
+		GameMode->RegisterTeam
+			(TeamManager->CreateTeam(FVector(MapMaxX * TileSize, MapMaxY * TileSize, 100.0f) * TeamCounter,
+			(TeamCounter % 2) ? FRotator(0.0f, 180.0f, 0.0f) : FRotator()));
+	}
+	*/
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Cyan, TEXT("Spawning player 1"));
+
+	GameMode->RegisterTeam
+		(TeamManager->CreateTeam(FVector(-100.0f, -100.0f, 1000.0f), FRotator(-60.0f, 40.0f, 0.0f)));
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Cyan, TEXT("Spawning player 2"));
+
+	GameMode->RegisterTeam(TeamManager->CreateTeam
+		(FVector((MapMaxX + 1) * TileSize, (MapMaxY + 1) * TileSize, 1000.0f), FRotator(-60.0f, 140.0f, 0.0f)));
+}
+
+void AMapGenerator::SpawnPlayerTroops()
+{
+	ATrooper* TrooperBuffer;
+	FRotator Team2TroopRotation = { 0.0f, 180.f, 0.0f };
+
+	for (uint8 I = 0; I < 3; I++)
+	{
+		for (uint8 J = 0; J < 3; J++)
+		{
+			switch (I + J)
+			{
+				case 0: case 1: /* Generate Champions */
+					// Create and tweak Champions
+					TrooperBuffer = Cast<ATrooper>(TroopManager->SpawnChampionAt(FVector(I * TileSize, J * TileSize, 0)));
+					if (TrooperBuffer)
+					{
+						TrooperBuffer->Team = GameMode->GetTeamAt(0);
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(I, J));
+					}
+
+					TrooperBuffer = Cast<ATrooper>(TroopManager->SpawnChampionAt(FVector(((MapMaxX - 1) - I) * TileSize, ((MapMaxY - 1) - J) * TileSize, 0)));
+					if (TrooperBuffer)
+					{
+						TrooperBuffer->SetActorRotation(Team2TroopRotation);
+						TrooperBuffer->Facing = EDirectionEnum::DE_Backward;
+						TrooperBuffer->Team = GameMode->GetTeamAt(1);
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((MapMaxX - 1) - I), ((MapMaxY - 1) - J)));
+					}
+					break;
+
+				case 2: case 3: /* Spawn Regular */
+					// Create and tweak Regulars
+					TrooperBuffer = (ATrooper*)TroopManager->SpawnPawnAt(FVector(I * TileSize, J * TileSize, 0));
+					if (TrooperBuffer)
+					{
+						TrooperBuffer->Team = GameMode->GetTeamAt(0);
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(I, J));
+					}
+					
+					TrooperBuffer = (ATrooper*)TroopManager->SpawnPawnAt(FVector(((MapMaxX - 1) - I) * TileSize, ((MapMaxY - 1) - J) * TileSize, 0));
+					if (TrooperBuffer)
+					{
+						TrooperBuffer->SetActorRotation(Team2TroopRotation);
+						TrooperBuffer->Facing = EDirectionEnum::DE_Backward;
+						TrooperBuffer->Team = GameMode->GetTeamAt(1);
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((MapMaxX - 1) - I), ((MapMaxY - 1) - J)));
+					}
+					break;
+
+				default: 
+					break;
+			}
+		}
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -150,7 +221,11 @@ void AMapGenerator::BeginPlay()
 
 	FindGameMode();
 
+	SpawnTeamLeaders();
+
 	PreGenerateGround();
+
+	SetPlayerTroops();
 
 	if (!AStar(CombatGrid.Get(), MapMaxX, MapMaxY).isPossiblePathExisting(FPosition(0, 0)))
 	{
@@ -158,6 +233,10 @@ void AMapGenerator::BeginPlay()
 	}
 
 	GenerateGround();
+
+	SpawnPlayerTroops();
+
+	Cast<AThisisNotXcomGameMode>(GetWorld()->GetAuthGameMode())->InitFinished();
 }
 
 // Called every frame
@@ -167,22 +246,7 @@ void AMapGenerator::Tick(float DeltaTime)
 
 }
 
-void AMapGenerator::SpawnFloor(const FVector& Position)
+ATile* AMapGenerator::SpawnFloor(const FVector& Position)
 {
-	if (!OGFloor.IsValid()) 
-	{
-		OGFloor = GetWorld()->SpawnActor(FloorClass, &Position);
-	} 
-	else 
-	{
-
-		FActorSpawnParameters	Parameters;
-		FVector					TruePosition(Position);
-		FRotator				Rotator(0, 0, 0);
-
-		Parameters.Template	=	OGFloor.Get();
-		TruePosition.Z		=	0.0;
-
-		GetWorld()->SpawnActor(FloorClass, &TruePosition, &Rotator, Parameters);
-	}
+	return (ATile*) GetWorld()->SpawnActor(FloorClass, &Position);
 }

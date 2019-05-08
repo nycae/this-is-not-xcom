@@ -6,9 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "TroopManager.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class THISISNOTXCOM_API ATroopManager : public AActor
 {

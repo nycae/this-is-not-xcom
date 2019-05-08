@@ -6,6 +6,7 @@
 #include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "TroopManager.h"
 #include "Grid.h"
+#include "TeamManager.h"
 #include "ThisisNotXComGameMode.h"
 #include "GameFramework/Actor.h"
 #include "MapGenerator.generated.h"
@@ -31,6 +32,8 @@ private:
 
 	void FindGameMode();
 
+	void SpawnTeamLeaders();
+
 	void PreGenerateGround();
 
 	void SetPlayerTroops();
@@ -39,15 +42,15 @@ private:
 
 	void GenerateGround();
 
+	void SpawnPlayerTroops();
+
 	TWeakObjectPtr<AThisisNotXcomGameMode> GameMode;
 
 	TWeakObjectPtr<AGrid> CombatGrid;
 
 	TWeakObjectPtr<ATroopManager> TroopManager;
 
-	TWeakObjectPtr<AActor> OGFloor;
-
-	void SpawnFloor(const FVector& Position);
+	ATile* SpawnFloor(const FVector& Position);
 
 public:	
 	// Called every frame
@@ -73,5 +76,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Structures")
 		UInstancedStaticMeshComponent* ObstructingStructure;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team Management")
+		ATeamManager* TeamManager;
 
 };

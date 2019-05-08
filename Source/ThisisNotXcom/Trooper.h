@@ -8,6 +8,8 @@
 #include "Position.h"
 #include "Trooper.generated.h"
 
+class ATeamLeader;
+
 UCLASS()
 class THISISNOTXCOM_API ATrooper : public ACharacter
 {
@@ -17,7 +19,7 @@ public:
 
 	ATrooper();
 
-private:
+protected:
 
 	uint8 MaxHealth;
 
@@ -39,13 +41,26 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void Move(const FPosition& Position) const;
+	uint8 MaxMoveDepth;
 
-	virtual void Attack(const FPosition& Position) const;
+	uint8 MaxAttackDepth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Speed = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ATeamLeader* Team;
+
 	UPROPERTY(BlueprintReadWrite)
 		EDirectionEnum Facing = EDirectionEnum::DE_Forward;
+
+	UFUNCTION(BlueprintCallable)
+		float GetHealthPercentage() const;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+		void PlayMovementAnimation(const TArray<EDirectionEnum>& MovementList);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+		void PlayAttackAnimation(EDirectionEnum Direction);
+
 };

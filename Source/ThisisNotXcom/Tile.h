@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+class AGrid;
+
 UENUM()
 enum class ETileState : uint8
 {
@@ -25,6 +27,15 @@ public:
 	// Sets default values for this actor's properties
 	ATile();
 
+	UFUNCTION(BlueprintCallable)
+		virtual void OnClick(); 
+
+	UFUNCTION(BlueprintCallable)
+		void EndTurn();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Tile")
+		void ToggleSelected();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,5 +52,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Is Selected")
 		bool bIsSelected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parent")
+		AGrid* Grid;
 
 };

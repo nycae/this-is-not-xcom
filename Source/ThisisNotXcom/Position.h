@@ -12,7 +12,7 @@ struct FPosition
 {
 	GENERATED_USTRUCT_BODY()
 
-	FPosition(int32 Row = 1, int32 Column = 1);
+	FPosition(int32 Row = -1, int32 Column = -1);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 Row;

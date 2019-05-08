@@ -4,8 +4,8 @@
 #include "ConstructorHelpers.h"
 
 // Sets default values
-ATrooper::ATrooper() 
-	: Super(), MaxHealth(50), Health(50), AttackDamage(15)
+ATrooper::ATrooper()
+	: Super(), Health(MaxHealth)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,17 +29,6 @@ void ATrooper::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	APawn::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
-void ATrooper::Move(const FPosition& Position) const
-{
-	return;
-}
-
-void ATrooper::Attack(const FPosition& Position) const
-{
-	return;
-}
-
 
 FVector ATrooper::GetVectorFromDirection(EDirectionEnum Direction) const
 {
@@ -65,4 +54,9 @@ FVector ATrooper::GetVectorFromDirection(EDirectionEnum Direction) const
 	}
 
 	return FinalPosition;
+}
+
+float ATrooper::GetHealthPercentage() const
+{
+	return ((float)Health) / MaxHealth;
 }

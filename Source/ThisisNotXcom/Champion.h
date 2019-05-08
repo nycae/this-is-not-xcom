@@ -16,9 +16,6 @@ class THISISNOTXCOM_API AChampion : public ATrooper
 	
 public:
 
-	UFUNCTION(BlueprintCallable)
-		virtual void Move(const FPosition& Position) const override;
+	AChampion();
 
-	UFUNCTION(BlueprintCallable)
-		virtual void Attack(const FPosition& Position) const override;
 };

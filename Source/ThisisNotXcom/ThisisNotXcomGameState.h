@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Team.h"
 #include "GameFramework/GameState.h"
 #include "ThisisNotXcomGameState.generated.h"
 
@@ -18,9 +17,5 @@ class THISISNOTXCOM_API AThisisNotXcomGameState : public AGameState
 public:
 
 	AThisisNotXcomGameState();
-
-	UTeam* FirstTeam;
-
-	UTeam* SecondTeam;
 	
 };

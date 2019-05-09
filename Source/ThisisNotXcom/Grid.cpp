@@ -81,7 +81,10 @@ void AGrid::SetSpawnPoint(const FPosition& Position)
 void AGrid::FreeCoordinate(const FPosition& Position)
 {
 	if (Tiles.Contains(Position))
+	{
 		Tiles[Position]->State = ETileState::TS_Empty;
+		Tiles[Position]->Ocupant = nullptr;
+	}
 }
 
 void AGrid::OccupiedBy(const FPosition& Position, ATrooper* Occupant)

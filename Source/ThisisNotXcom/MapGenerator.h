@@ -55,12 +55,15 @@ private:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	/*
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Size")
 		int32 MapMaxX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Size")
 		int32 MapMaxY;
+		*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Size")
+		int32 SideSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Size")
 		int32 TileSize;

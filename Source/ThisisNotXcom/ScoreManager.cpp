@@ -22,6 +22,22 @@ UScoreManager::UScoreManager()
 	}
 }
 
+UScoreManager::~UScoreManager()
+{
+	FString ScoresFilePath = FPaths::ProjectDir() + "Scores.txt";
+	FString FileData = "";
+
+	for (const auto& Pair : Scores)
+	{
+		FileData.Append(Pair.Key + " ");
+		FileData.AppendInt(Pair.Value);
+		FileData.Append("\n");
+	}
+
+	FFileHelper::SaveStringToFile(FileData, *ScoresFilePath);
+
+}
+
 FUserScore UScoreManager::GetPlayerScore(const FString& PlayerName) const
 {
 

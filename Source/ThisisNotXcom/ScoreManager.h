@@ -17,6 +17,8 @@ public:
 
 	UScoreManager();
 
+	~UScoreManager();
+
 	UFUNCTION(BlueprintCallable)
 		FUserScore GetPlayerScore(const FString& PlayerName) const;
 

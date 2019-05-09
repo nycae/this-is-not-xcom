@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void OnEndOfTurn();
 
+	UFUNCTION(BlueprintCallable)
+		void OnEndGame();
+
 private:
 
 	EGameState State;
@@ -56,6 +59,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		ATeamLeader* GetTeamAt(uint8 Index);
+
+	UFUNCTION(BlueprintCallable)
+		ATeamLeader* GetTeamTurn();
 
 };
 

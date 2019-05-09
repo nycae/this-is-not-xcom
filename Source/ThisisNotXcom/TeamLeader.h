@@ -61,15 +61,31 @@ private:
 
 	bool bIsTurnAttackDone;
 
+	bool bIsMenuBeeingDisplayed;
+
+	void OnEndMove();
+
+	void OnEndAttack();
+
+	void OnUnitKill();
+
 public:
+
+	void KillMe(ATrooper* Trooper);
 
 	UFUNCTION(BlueprintCallable)
 		void OnNewTurn();
 
+	UFUNCTION(BlueprintCallable)
+		void EndTurn();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
 		int32 Score = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Name")
+	UPROPERTY(BlueprintReadWrite)
+		uint8 NumberOfUnits = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
 		FString PlayerName;
 
 };

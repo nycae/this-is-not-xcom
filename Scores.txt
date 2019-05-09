@@ -1,4 +1,0 @@
-Juegador 582
-Playeador 241
-Gameador 321
-OtroMas 256

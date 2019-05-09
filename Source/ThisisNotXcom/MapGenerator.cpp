@@ -17,31 +17,44 @@ void AMapGenerator::PreGenerateGround()
 	FVector SpawnPosition1;
 	FVector SpawnPosition2;
 
-	ATile* TileBuffer1;
-	ATile* TileBuffer2;
+	ATile* TileBuffer1 = nullptr;
+	ATile* TileBuffer2 = nullptr;
 
 	// Spawn floor and generate obstructed tiles
-	for (int i = 0; i < MapMaxX; i++) 
+	for (int i = 0; i < SideSize - 1; i++) 
 	{
-		for (int j = 0; j < MapMaxY - i; j++) 
+		for (int j = 0; j < SideSize - 1 - i; j++) 
 		{
 
 			SpawnPosition1 = FVector(float(i * TileSize), float(j * TileSize), -60.0);
-			SpawnPosition2 = FVector(float(((MapMaxX - 1) - i) * TileSize), float(((MapMaxY - 1) - j) * TileSize), -60.0);
+			SpawnPosition2 = FVector(float(((SideSize - 1) - j) * TileSize), float(((SideSize - 1) - i) * TileSize), -60.0);
 
 			TileBuffer1 = SpawnFloor(SpawnPosition1); 
 			TileBuffer2 = SpawnFloor(SpawnPosition2);
 
-			if (BlockChance / 2.0 > FMath::FRandRange(0.0, 1.0)) 
+			if (BlockChance / 2.0 > FMath::FRandRange(0.0, 1.0))
 			{
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Obstructed, TileBuffer1);
-				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Obstructed, TileBuffer2);
+				CombatGrid->AddAtCoordinates(((SideSize - 1) - j), ((SideSize - 1) - i), ETileState::TS_Obstructed, TileBuffer2);
 			}
-			else 
+			else
 			{
 				CombatGrid->AddAtCoordinates(i, j, ETileState::TS_Empty, TileBuffer1);
-				CombatGrid->AddAtCoordinates(((MapMaxY - 1) - j), ((MapMaxX - 1) - i), ETileState::TS_Empty, TileBuffer2);
+				CombatGrid->AddAtCoordinates(((SideSize - 1) - j), ((SideSize - 1) - i), ETileState::TS_Empty, TileBuffer2);
 			}
+		}
+	}
+	/* Para no generar la línea del centro 2 veces en caso de que el número de fila sea par */
+	for (int I = 0; I < SideSize ; I++)
+	{
+		TileBuffer1 = SpawnFloor(FVector(I * TileSize, (SideSize - 1 - I) * TileSize , -60.0f));
+		if (BlockChance > FMath::FRandRange(0.0, 1.0))
+		{
+			CombatGrid->AddAtCoordinates(I, (SideSize - 1 - I), ETileState::TS_Obstructed, TileBuffer1);
+		}
+		else
+		{
+			CombatGrid->AddAtCoordinates(I, (SideSize - 1 - I), ETileState::TS_Empty, TileBuffer1);
 		}
 	}
 }
@@ -57,16 +70,16 @@ void AMapGenerator::SetPlayerTroops()
 				case 0: case 1: /* Spawn Champion */ 
 					// Create Champion
 					CombatGrid->SetSpawnPoint(FPosition(i, j));
-					CombatGrid->SetSpawnPoint(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
+					CombatGrid->SetSpawnPoint(FPosition((SideSize - 1) - i, (SideSize - 1) - j));
 					break;
 				case 2: case 3: /* Spawn Regular */ 
 					// Create Pawn
 					CombatGrid->SetSpawnPoint(FPosition(i, j));
-					CombatGrid->SetSpawnPoint(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
+					CombatGrid->SetSpawnPoint(FPosition((SideSize - 1) - i, (SideSize - 1) - j));
 					break;
 				default:
 					CombatGrid->FreeCoordinate(FPosition(i, j));
-					CombatGrid->FreeCoordinate(FPosition((MapMaxX - 1) - i, (MapMaxY - 1) - j));
+					CombatGrid->FreeCoordinate(FPosition((SideSize - 1) - i, (SideSize - 1) - j));
 					break;
 			}
 		}
@@ -76,7 +89,7 @@ void AMapGenerator::SetPlayerTroops()
 void AMapGenerator::FixGround()
 {
 	// Find a path in the grid
-	for (int32 i = 2; i < FMath::Min(MapMaxX, MapMaxY); i++) 
+	for (int32 i = 2; i < FMath::Min(SideSize, SideSize); i++) 
 	{
 		CombatGrid->FreeCoordinate(FPosition(i, i));
 
@@ -137,7 +150,7 @@ void AMapGenerator::SpawnTeamLeaders()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Cyan, FString::Printf(TEXT("Spawning player %d"), TeamCounter + 1	));
 
 		GameMode->RegisterTeam
-			(TeamManager->CreateTeam(FVector(MapMaxX * TileSize, MapMaxY * TileSize, 100.0f) * TeamCounter,
+			(TeamManager->CreateTeam(FVector(SideSize * TileSize, SideSize * TileSize, 100.0f) * TeamCounter,
 			(TeamCounter % 2) ? FRotator(0.0f, 180.0f, 0.0f) : FRotator()));
 	}
 	*/
@@ -150,7 +163,7 @@ void AMapGenerator::SpawnTeamLeaders()
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Cyan, TEXT("Spawning player 2"));
 
 	GameMode->RegisterTeam(TeamManager->CreateTeam
-		(FVector((MapMaxX + 1) * TileSize, (MapMaxY + 1) * TileSize, 1000.0f), FRotator(-60.0f, 140.0f, 0.0f)));
+		(FVector((SideSize + 1) * TileSize, (SideSize + 1) * TileSize, 1000.0f), FRotator(-60.0f, 140.0f, 0.0f)));
 }
 
 void AMapGenerator::SpawnPlayerTroops()
@@ -170,16 +183,18 @@ void AMapGenerator::SpawnPlayerTroops()
 					if (TrooperBuffer)
 					{
 						TrooperBuffer->Team = GameMode->GetTeamAt(0);
+						TrooperBuffer->Team->NumberOfUnits++;
 						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(I, J));
 					}
 
-					TrooperBuffer = Cast<ATrooper>(TroopManager->SpawnChampionAt(FVector(((MapMaxX - 1) - I) * TileSize, ((MapMaxY - 1) - J) * TileSize, 0)));
+					TrooperBuffer = Cast<ATrooper>(TroopManager->SpawnChampionAt(FVector(((SideSize - 1) - I) * TileSize, ((SideSize - 1) - J) * TileSize, 0)));
 					if (TrooperBuffer)
 					{
 						TrooperBuffer->SetActorRotation(Team2TroopRotation);
 						TrooperBuffer->Facing = EDirectionEnum::DE_Backward;
 						TrooperBuffer->Team = GameMode->GetTeamAt(1);
-						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((MapMaxX - 1) - I), ((MapMaxY - 1) - J)));
+						TrooperBuffer->Team->NumberOfUnits++;
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((SideSize - 1) - I), ((SideSize - 1) - J)));
 					}
 					break;
 
@@ -189,16 +204,18 @@ void AMapGenerator::SpawnPlayerTroops()
 					if (TrooperBuffer)
 					{
 						TrooperBuffer->Team = GameMode->GetTeamAt(0);
+						TrooperBuffer->Team->NumberOfUnits++;
 						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(I, J));
 					}
 					
-					TrooperBuffer = (ATrooper*)TroopManager->SpawnPawnAt(FVector(((MapMaxX - 1) - I) * TileSize, ((MapMaxY - 1) - J) * TileSize, 0));
+					TrooperBuffer = (ATrooper*)TroopManager->SpawnPawnAt(FVector(((SideSize - 1) - I) * TileSize, ((SideSize - 1) - J) * TileSize, 0));
 					if (TrooperBuffer)
 					{
 						TrooperBuffer->SetActorRotation(Team2TroopRotation);
 						TrooperBuffer->Facing = EDirectionEnum::DE_Backward;
 						TrooperBuffer->Team = GameMode->GetTeamAt(1);
-						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((MapMaxX - 1) - I), ((MapMaxY - 1) - J)));
+						TrooperBuffer->Team->NumberOfUnits++;
+						CombatGrid->AddOcupantAt(TrooperBuffer, FPosition(((SideSize - 1) - I), ((SideSize - 1) - J)));
 					}
 					break;
 
@@ -227,7 +244,7 @@ void AMapGenerator::BeginPlay()
 
 	SetPlayerTroops();
 
-	if (!AStar(CombatGrid.Get(), MapMaxX, MapMaxY).isPossiblePathExisting(FPosition(0, 0)))
+	if (!AStar(CombatGrid.Get(), SideSize, SideSize).isPossiblePathExisting(FPosition(0, 0)))
 	{
 		FixGround();
 	}

@@ -27,7 +27,7 @@ void AThisisNotXcomGameMode::InitFinished()
 {
 	State = EGameState::GS_PlayerTurn;
 
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[ /* TurnHolder % Teams.Num() */ 0] );
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[ TurnHolder % Teams.Num() ] );
 
 }
 
@@ -36,9 +36,12 @@ void AThisisNotXcomGameMode::OnEndOfTurn()
 	if (TurnHolder > 500)
 	{
 		// TODO: Force endgame
+		OnEndGame();
 	}
 
 	TurnHolder++;
+
+	Teams[TurnHolder % Teams.Num()]->OnNewTurn();
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[TurnHolder % Teams.Num()] );
 
@@ -60,4 +63,17 @@ ATeamLeader* AThisisNotXcomGameMode::GetTeamAt(uint8 Index)
 	{
 		return nullptr;
 	}
+}
+
+void AThisisNotXcomGameMode::OnEndGame()
+{
+	for (const auto& Player : Teams)
+	{
+		ScoreManager->UpdateScore(Player->PlayerName, Player->Score);
+	}
+}
+
+ATeamLeader* AThisisNotXcomGameMode::GetTeamTurn()
+{
+	return Teams[TurnHolder % Teams.Num()];
 }

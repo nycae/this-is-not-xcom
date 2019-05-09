@@ -16,6 +16,7 @@ ATeamLeader::ATeamLeader()
 	bIsTurnMoveDone = false;
 	bIsTurnAttackDone = false;
 	bIsInLookMode = false;
+	bIsMenuBeeingDisplayed = false;
 
 }
 
@@ -44,7 +45,18 @@ void ATeamLeader::BeginPlay()
 	verify(Grids.Num() > 0);
 
 	CombatGrid = Cast<AGrid>(Grids[0]);
+	/*
+	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprints/UserInterface/BP_InGameMenu"));
 
+	if (WidgetClass.Class)
+	{
+		Menu = CreateWidget<UUserWidget>(UGameplayStatics::GetGameInstance(GetWorld()), WidgetClass.Class);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(1, 15.0f, FColor::Yellow, "No se ha encontrado la clase");
+	}
+	*/
 }
 
 void ATeamLeader::Tick(float DeltaTime)
@@ -81,6 +93,9 @@ void ATeamLeader::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ATeamLeader::OnClick);
 	InputComponent->BindAction("RightMouse", IE_Pressed, this, &ATeamLeader::HideCursor);
 	InputComponent->BindAction("RightMouse", IE_Released, this, &ATeamLeader::DisplayCursor);
+	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ATeamLeader::EndTurn);
+	InputComponent->BindAction("ResetTurn", IE_Pressed, this, &ATeamLeader::OnNewTurn);
+	InputComponent->BindAction("ForceEndgame", IE_Pressed, GameMode, &AThisisNotXcomGameMode::OnEndGame);
 
 }
 
@@ -209,30 +224,38 @@ void ATeamLeader::OnClick()
 						} // Si la nueva unidad es aliada cambia
 						else
 						{
-							GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, "Esa unidad no es mia");
-							// TODO: Attack
+							if (!bIsTurnAttackDone)
+							{
+								GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, "Esa unidad no es mia");
+								if ( (Tile->Ocupant->OnAttack(SelectedTile->Ocupant)) < 0 )
+								{
+									CombatGrid->FreeCoordinate(CombatGrid->GetPosition(Tile));
+									Score += 50;
+								}
+								OnEndAttack();
+							} // TODO: Attack
 						} // Si la unidad es enemiga atácala
 					}
 					else
 					{
-						FPosition SelectedUnitPosition = CombatGrid->GetPosition(SelectedTile.Get());
-						FPosition ObjectivePosition = CombatGrid->GetPosition(Tile);
+						if (!bIsTurnMoveDone)
+						{
+							FPosition SelectedUnitPosition = CombatGrid->GetPosition(SelectedTile.Get());
+							FPosition ObjectivePosition = CombatGrid->GetPosition(Tile);
 
-						TArray<EDirectionEnum> Path = CombatGrid->GetPath
+							TArray<EDirectionEnum> Path = CombatGrid->GetPath
 							(SelectedUnitPosition, ObjectivePosition, SelectedTile->Ocupant->MaxMoveDepth);
 
-						if (Path.Num() > 0)
-						{
-							// TODO: Move
-							SelectedTile->Ocupant->PlayMovementAnimation(Path);
-							CombatGrid->SwapPositions(SelectedUnitPosition, ObjectivePosition);
-
-							SelectedTile->ToggleSelected();
-							SelectedTile = nullptr;
-						}
-						else
-						{
-							GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, "No se puede mover");
+							if (Path.Num() > 0)
+							{
+								SelectedTile->Ocupant->PlayMovementAnimation(Path);
+								CombatGrid->SwapPositions(SelectedUnitPosition, ObjectivePosition);
+								OnEndMove();
+							}
+							else
+							{
+								GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, "No se puede mover");
+							}
 						}
 					} // Si no hay unidad mueve la seleccionada
 				}
@@ -247,4 +270,52 @@ void ATeamLeader::OnNewTurn()
 	bIsTurnMoveDone = false;
 	bIsTurnAttackDone = false;
 
+}
+
+void ATeamLeader::OnEndMove()
+{
+	SelectedTile->ToggleSelected();
+	SelectedTile = nullptr;
+
+	bIsTurnMoveDone = true;
+
+	if (bIsTurnMoveDone && bIsTurnAttackDone)
+	{
+		Cast<AThisisNotXcomGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->OnEndOfTurn();
+	}
+}
+
+void ATeamLeader::OnEndAttack()
+{
+	SelectedTile->ToggleSelected();
+	SelectedTile = nullptr;
+
+	bIsTurnAttackDone = true;
+
+	Score += 10;
+
+	if (bIsTurnMoveDone && bIsTurnAttackDone)
+	{
+		Cast<AThisisNotXcomGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->OnEndOfTurn();
+	}
+}
+
+void ATeamLeader::EndTurn()
+{
+	Cast<AThisisNotXcomGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->OnEndOfTurn();
+}
+
+void ATeamLeader::KillMe(ATrooper* Trooper)
+{
+	Trooper->SetActorHiddenInGame(true);
+}
+
+void ATeamLeader::OnUnitKill()
+{
+	NumberOfUnits--;
+
+	if (NumberOfUnits == 0)
+	{
+		GameMode->OnEndGame();
+	}
 }

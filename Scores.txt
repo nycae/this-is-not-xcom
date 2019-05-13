@@ -1,0 +1,4 @@
+pepito 1
+juanito 10
+pedrito 4
+jugador 20

@@ -6,18 +6,19 @@
 
 UScoreManager::UScoreManager()
 {
-	FString ScoresFilePath = FPaths::ProjectDir() + "Scores.txt";
-	FString PlayerName, PlayerScore;
-	TArray<FString> FileData;
+	FString File;
+	TArray<FString> Lines;
 
-	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*ScoresFilePath))
-	{
-		FFileHelper::LoadFileToStringArray(FileData, *ScoresFilePath);
+	if (FFileHelper::LoadFileToString(File, *(FPaths::ProjectDir() + "/Scores.txt"))) {
+		TArray<FString> Lines;
+		File.ParseIntoArray(Lines, _T("\n"), true);
 
-		for (const auto& Line : FileData)
-		{
-			Line.Split(TEXT(" "), &PlayerName, &PlayerScore);
-			Scores.Emplace(PlayerName, FCString::Atoi(*PlayerScore));
+		for (const auto& Line : Lines) {
+
+			TArray<FString> Pair;
+			Line.ParseIntoArray(Pair, TEXT(" "), true);
+
+			Scores.Add(Pair[0], FCString::Atoi(*Pair[1]));
 		}
 	}
 }

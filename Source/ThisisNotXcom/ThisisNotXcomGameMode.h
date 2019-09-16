@@ -4,6 +4,7 @@
 
 #include "Core.h"
 #include "TeamLeader.h"
+#include "UnitManager.h"
 #include "ScoreManager.h"
 #include "GameFramework/GameModeBase.h"
 #include "ThisisNotXcomGameMode.generated.h"
@@ -15,7 +16,8 @@ UENUM(BlueprintType)
 enum class EGameState : uint8
 {
 	GS_Init			UMETA(DisplayName="Initializing"),
-	GS_PlayerTurn	UMETA(DisplayName="Player One Turn"),
+	GS_UnitSetup	UMETA(DisplayName="Unit setup"),
+	GS_PlayerTurn	UMETA(DisplayName="Player Turn"),
 	GS_TurnSwap		UMETA(DisplayName="Turn Swap"),
 	GS_Ending		UMETA(DisplayName="Ending"),
 	GS_MAX			UMETA(DisplayName="MAX")
@@ -32,36 +34,43 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void RegisterTeam(ATeamLeader* NewTeam);
+	UFUNCTION(BlueprintCallable)
+		virtual void InitFinished();
 
 	UFUNCTION(BlueprintCallable)
-		void InitFinished();
+		virtual void AfterUnitDeployment();
 
 	UFUNCTION(BlueprintCallable)
-		void OnEndOfTurn();
+		virtual void OnUnitDeath(AUnit* Unit, ATeamLeader* Team);
 
 	UFUNCTION(BlueprintCallable)
-		void OnEndGame();
+		virtual void OnEndOfTurn();
 
-private:
-
-	EGameState State;
-
-	//TCircularQueue<ATeamLeader*> Teams;	/* No appropriate default constructor available */
-	TArray<ATeamLeader*> Teams;
-
-	int16 TurnHolder;
-
-public:
-
-	UPROPERTY(BlueprintReadWrite)
-		UScoreManager* ScoreManager;
+	UFUNCTION(BlueprintCallable)
+		virtual void OnEndGame();
 
 	UFUNCTION(BlueprintCallable)
 		ATeamLeader* GetTeamAt(uint8 Index);
 
 	UFUNCTION(BlueprintCallable)
 		ATeamLeader* GetTeamTurn();
+
+private:
+
+	EGameState State;
+
+	TArray<ATeamLeader*> Teams;
+
+	TMap<ATeamLeader*, int32> RemainingUnits;
+
+	uint16 TurnHolder;
+
+	UScoreManager* ScoreManager;
+
+
+public:
+
+	void AttendTurn(ATeamLeader* Team);
 
 };
 

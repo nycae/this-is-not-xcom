@@ -6,12 +6,15 @@
 constexpr EDirectionEnum EveryDirection[] =
 	{ EDirectionEnum::DE_Backward, EDirectionEnum::DE_Forward, EDirectionEnum::DE_Left, EDirectionEnum::DE_Right };
 
-GridPathfinder::GridPathfinder()
+
+TArray<EDirectionEnum> GridPathfinder::GetPath
+	(const ATile* Origin, const ATile* Destiny, int32 MaxDepth, const AGrid* Grid)
 {
+	return GetPath(Grid->GetPosition(Origin), Grid->GetPosition(Destiny), MaxDepth, Grid);
 }
 
 TArray<EDirectionEnum> GridPathfinder::GetPath
-	(const FPosition& Origin, const FPosition& Destiny, uint8 MaxDepth, const AGrid* Grid)
+	(const FPosition& Origin, const FPosition& Destiny, int32 MaxDepth, const AGrid* Grid)
 {
 	if (!Grid->isEmpty(Destiny) || MaxDepth == 0)
 	{
@@ -66,37 +69,6 @@ TArray<EDirectionEnum> GridPathfinder::GetPath
 	}
 
 	return TArray<EDirectionEnum>();
-	/*
-	TArray<EDirectionEnum> Traceback;
-
-	TMap<FPosition, bool> Visited;
-	TQueue<FPosition> Fringe;
-	Fringe.Enqueue(Origin);
-
-	while (!Fringe.IsEmpty())
-	{
-		FPosition CurrentState = Fringe.Pop();
-		
-		if (Grid->isEmpty(CurrentState) && Visited[CurrentState] == false)
-		{
-			FPosition NewState(Origin);
-
-			NewState.Row++;
-			Fringe.Enqueue(NewState);
-
-			NewState.Row -= 2;
-			Fringe.Enqueue(NewState);
-
-			NewState.Row++; NewState.Column++;
-			Fringe.Enqueue(NewState);
-
-			NewState.Column -= 2;
-			Fringe.Enqueue(NewState);
-		}
-	}
-
-	return Traceback;
-	*/
 }
 
 FPosition GridPathfinder::GetWhereAmI
@@ -157,12 +129,4 @@ void GridPathfinder::PrintPath(const TArray<EDirectionEnum>& Path)
 			break;
 		}
 	}
-}
-
-TArray<FPosition> GridPathfinder::ExpandPath(const FPosition& Origin)
-{
-	TArray<FPosition> NewStates;
-
-	
-	return NewStates;
 }

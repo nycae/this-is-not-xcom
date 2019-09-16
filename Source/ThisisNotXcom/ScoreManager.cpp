@@ -7,7 +7,6 @@
 UScoreManager::UScoreManager()
 {
 	FString File;
-	TArray<FString> Lines;
 
 	if (FFileHelper::LoadFileToString(File, *(FPaths::ProjectDir() + "/Scores.txt"))) {
 		TArray<FString> Lines;

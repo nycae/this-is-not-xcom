@@ -21,19 +21,22 @@ public:
 
 	AGrid();
 
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
+		int32 TileSize;
 
-protected:
-
-	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
+		TMap<FPosition, ATile*> Tiles;
 
 public:
 
 	UFUNCTION(BlueprintCallable)
-		void AddAtCoordinates(const int32& Row, const int32& Column, const ETileState& State, ATile* Tile);
+		void ObstructPosition(const FPosition& Position);
 
 	UFUNCTION(BlueprintCallable)
-		void AddAtPosition(const FPosition& Position, const ETileState& State, ATile* Tile);
+		void AddAtCoordinates(int32 Row, int32 Column, ATile* Tile);
+
+	UFUNCTION(BlueprintCallable)
+		void AddAtPosition(const FPosition& Position, ATile* Tile);
 
 	UFUNCTION(BlueprintCallable)
 		bool isEmpty(const FPosition& Position) const;
@@ -45,7 +48,7 @@ public:
 		TArray<FPosition> GetObstructedPositions() const;
 
 	UFUNCTION(BlueprintCallable)
-		FPosition GetPosition(ATile* Tile) const;
+		FPosition GetPosition(const ATile* Tile) const;
 
 	UFUNCTION(BlueprintCallable)
 		void SetSpawnPoint(const FPosition& Position);
@@ -54,19 +57,15 @@ public:
 		void FreeCoordinate(const FPosition& Position);
 
 	UFUNCTION(BlueprintCallable)
-		void OccupiedBy(const FPosition& Position, ATrooper* Occupant);
+		void OccupiedBy(const FPosition& Position, AUnit* Occupant);
 
 	UFUNCTION(BlueprintCallable)
 		TArray<EDirectionEnum> GetPath(const FPosition& Origin, const FPosition& Destiny, uint8 MaxDepth) const;
 
 	UFUNCTION(BlueprintCallable)
-		void AddOcupantAt(ATrooper* NewOcupant, const FPosition& Position);
+		void AddOcupantAt(AUnit* NewOcupant, const FPosition& Position);
 
 	UFUNCTION(BlueprintCallable)
 		void SwapPositions(const FPosition& Origin, const FPosition& Destiny);
-
-private:
-
-	TMap<FPosition, ATile*> Tiles;
 
 };

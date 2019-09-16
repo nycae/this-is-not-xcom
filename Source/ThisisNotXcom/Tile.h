@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Trooper.h"
+#include "Unit.h"
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
@@ -27,31 +27,19 @@ public:
 	// Sets default values for this actor's properties
 	ATile();
 
-	UFUNCTION(BlueprintCallable)
-		virtual void OnClick(); 
-
-	UFUNCTION(BlueprintCallable)
-		void EndTurn();
-
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Tile")
 		void ToggleSelected();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Tile")
+		void ToggleObjective();
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ocupant")
-		ATrooper* Ocupant;
+		AUnit* Ocupant;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		ETileState State;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Is Selected")
-		bool bIsSelected;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parent")
 		AGrid* Grid;

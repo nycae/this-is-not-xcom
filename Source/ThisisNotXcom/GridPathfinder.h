@@ -13,11 +13,12 @@ class THISISNOTXCOM_API GridPathfinder
 {
 public:
 	
-	GridPathfinder();
-	
 	/* Pseudo BFS */
 	static TArray<EDirectionEnum> GetPath
-		(const FPosition& Origin, const FPosition& Destiny, uint8 MaxDepth, const AGrid* Grid);
+		(const FPosition& Origin, const FPosition& Destiny, int32 MaxDepth, const AGrid* Grid);
+
+	static TArray<EDirectionEnum> GetPath
+		(const ATile* Origin, const ATile* Destiny, int32 MaxDepth, const AGrid* Grid);
 
 	static void PrintPath(const TArray<EDirectionEnum>& Path);
 
@@ -25,7 +26,5 @@ private:
 
 	static FPosition GetWhereAmI
 		(FPosition Origin, const TArray<EDirectionEnum>& Try);
-
-	static TArray<FPosition> ExpandPath(const FPosition& Origin);
 
 };

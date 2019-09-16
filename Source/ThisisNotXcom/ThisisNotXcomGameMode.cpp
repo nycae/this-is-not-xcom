@@ -7,28 +7,60 @@
 #include "TeamLeader.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "EngineUtils.h"
 
 AThisisNotXcomGameMode::AThisisNotXcomGameMode()
-	: ScoreManager(NewObject<UScoreManager>()), State(EGameState::GS_Init)
+	: State(EGameState::GS_Init), ScoreManager(NewObject<UScoreManager>())
 {
-	DefaultPawnClass		=	NULL;//ATeamLeader::StaticClass();
-	PlayerControllerClass	=	AThisisNotXcomPlayerController::StaticClass();
-	TurnHolder				=	0;
+	PrimaryActorTick.bCanEverTick	=	false;
+	DefaultPawnClass				=	NULL;//ATeamLeader::StaticClass();
+	PlayerControllerClass			=	AThisisNotXcomPlayerController::StaticClass();
+	TurnHolder						=	0;
 
 }
 
 void AThisisNotXcomGameMode::BeginPlay()
 {
-	Super::BeginPlay();
+	for (TActorIterator<ATeamLeader> Itr(GetWorld()); Itr; ++Itr)
+	{
+		RemainingUnits.Add(*Itr, (*Itr)->Army.Num());
 
+		Teams.Add(*Itr);
+		(*Itr)->OnEndTurn.AddDynamic(this, &AThisisNotXcomGameMode::AttendTurn);
+		
+		for (AUnit* Unit : (*Itr)->Army)
+		{
+			Unit->OnDeath.AddDynamic(this, &AThisisNotXcomGameMode::OnUnitDeath);
+		}
+	}
 }
 
 void AThisisNotXcomGameMode::InitFinished()
 {
-	State = EGameState::GS_PlayerTurn;
+	State = EGameState::GS_UnitSetup;
 
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[ TurnHolder % Teams.Num() ] );
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[0] );
 
+}
+
+void AThisisNotXcomGameMode::AfterUnitDeployment()
+{
+	for (TActorIterator<AUnit> Itr(GetWorld()); Itr; ++Itr)
+	{
+		(*Itr)->OnDeath.AddDynamic(this, &AThisisNotXcomGameMode::OnUnitDeath);
+	}
+}
+
+void AThisisNotXcomGameMode::OnUnitDeath(AUnit* Unit, ATeamLeader* Team)
+{
+	Team->Army.Remove(Unit);
+	Team->Score -= 50;
+	Unit->MarkPendingKill();
+	
+	if (Team->Army.Num() <= 0)
+	{
+		OnEndGame();
+	}
 }
 
 void AThisisNotXcomGameMode::OnEndOfTurn()
@@ -41,15 +73,9 @@ void AThisisNotXcomGameMode::OnEndOfTurn()
 
 	TurnHolder++;
 
-	Teams[TurnHolder % Teams.Num()]->OnNewTurn();
+	//Teams[TurnHolder % Teams.Num()]->OnNewTurn();
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[TurnHolder % Teams.Num()] );
-
-}
-
-void AThisisNotXcomGameMode::RegisterTeam(ATeamLeader* NewTeam)
-{
-	Teams.Add(NewTeam);
 
 }
 
@@ -76,4 +102,9 @@ void AThisisNotXcomGameMode::OnEndGame()
 ATeamLeader* AThisisNotXcomGameMode::GetTeamTurn()
 {
 	return Teams[TurnHolder % Teams.Num()];
+}
+
+void AThisisNotXcomGameMode::AttendTurn(ATeamLeader* Team)
+{
+
 }

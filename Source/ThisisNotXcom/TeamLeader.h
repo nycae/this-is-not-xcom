@@ -2,13 +2,17 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "Engine.h"
 #include "Tile.h"
+#include "Unit.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/Pawn.h"
 #include "Camera/CameraComponent.h"
 #include "TeamLeader.generated.h"
 
-class AThisisNotXcomGameMode;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndTurn, ATeamLeader*, Team);
+
 
 UCLASS()
 class THISISNOTXCOM_API ATeamLeader : public APawn
@@ -22,8 +26,6 @@ protected:
 public:
 
 	ATeamLeader();
-
-	ATeamLeader(const FString& InitName);
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -45,47 +47,61 @@ public:
 
 	void DisplayCursor();
 
+	void DisplayInterface();
+
+	void HideInterface();
+
 private:
 
 	UCameraComponent* Camera;
 
-	AThisisNotXcomGameMode* GameMode;
-
-	TWeakObjectPtr<ATile> SelectedTile = nullptr;
-
-	TWeakObjectPtr<AGrid> CombatGrid;
+	UUserWidget* Interface = nullptr;
 
 	bool bIsInLookMode;
 
-	bool bIsTurnMoveDone;
-
-	bool bIsTurnAttackDone;
-
 	bool bIsMenuBeeingDisplayed;
 
-	void OnEndMove();
+private:
 
-	void OnEndAttack();
+	void OnEndOfAction();
 
-	void OnUnitKill();
+	void AttendHitResult(AActor* Result);
+
+	void AttendTile(ATile* Tile);
+
+	void AttendUnit(AUnit* Unit);
 
 public:
 
-	void KillMe(ATrooper* Trooper);
+	int32 Score = 0;
 
 	UFUNCTION(BlueprintCallable)
-		void OnNewTurn();
+		void FinishTurn();
 
 	UFUNCTION(BlueprintCallable)
-		void EndTurn();
+		void GrantTurn();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
-		int32 Score = 0;
+	UFUNCTION(BlueprintCallable)
+		void CancelSelection();
 
-	UPROPERTY(BlueprintReadWrite)
-		uint8 NumberOfUnits = 0;
+public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
+		AGrid* CombatGrid;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		TArray<AUnit*> Army;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Atributes")
 		FString PlayerName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
+		TWeakObjectPtr<ATile> SelectedTile = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
+		TWeakObjectPtr<ATile> ObjectiveTile = nullptr;
+
+	UPROPERTY(BlueprintAssignable, Category = "Event dispacher")
+		FOnEndTurn OnEndTurn;
 
 };

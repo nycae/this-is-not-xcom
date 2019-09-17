@@ -5,14 +5,13 @@
 #include "Engine.h"
 #include "Tile.h"
 #include "Unit.h"
-#include "Blueprint/UserWidget.h"
 #include "GameFramework/Pawn.h"
 #include "Camera/CameraComponent.h"
 #include "TeamLeader.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndTurn, ATeamLeader*, Team);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, ATeamLeader*, Team);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnBegin, ATeamLeader*, Team);
 
 UCLASS()
 class THISISNOTXCOM_API ATeamLeader : public APawn
@@ -47,15 +46,9 @@ public:
 
 	void DisplayCursor();
 
-	void DisplayInterface();
-
-	void HideInterface();
-
 private:
 
 	UCameraComponent* Camera;
-
-	UUserWidget* Interface = nullptr;
 
 	bool bIsInLookMode;
 
@@ -84,6 +77,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void CancelSelection();
 
+	UFUNCTION(BlueprintCallable)
+		void DebugReset();
+
+	UFUNCTION(BlueprintCallable)
+		void SwitchCamera(ACameraActor* NewCamera);
+
+	UFUNCTION(BlueprintCallable)
+		int64 HealthOfUnits() const;
+
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
@@ -102,6 +104,9 @@ public:
 		TWeakObjectPtr<ATile> ObjectiveTile = nullptr;
 
 	UPROPERTY(BlueprintAssignable, Category = "Event dispacher")
-		FOnEndTurn OnEndTurn;
+		FOnTurnEnd TurnEnd;
+
+	UPROPERTY(BlueprintAssignable, Category = "Event dispacher")
+		FOnTurnBegin BeginTurn;
 
 };

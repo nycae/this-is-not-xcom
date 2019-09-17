@@ -93,15 +93,13 @@ float AUnit::GetEnergyPercentage() const
 
 int AUnit::OnAttack(AUnit* Attacker)
 {
-	PlayDamagedAnimation();
-
 	Health -= Attacker->AttackDamage;
-
 	if (Health <= 0)
 	{
-		SetActorHiddenInGame(true);
 		OnDeath.Broadcast(this, Team);
 	}
+
+	PlayDamagedAnimation();
 
 	return Health;
 }
@@ -159,61 +157,57 @@ void AUnit::Attack(ATile* Tile)
 	HeightOffset = MyPosition.Row - TargetPosition.Row;
 	WidthOffset = MyPosition.Column - TargetPosition.Column;
 
-	TArray<EDirectionEnum> MovementList = GridPathfinder::GetPath(MyPosition, TargetPosition, MaxAttackDepth, Grid);
-
-	if (MovementList.Num() > 0)
+	if (HeightOffset + WidthOffset <= MaxAttackDepth)
 	{
 		Team->CancelSelection();
 
-		// Case Derecha
-		if (HeightOffset == 0 && WidthOffset < 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_Right);
-		}
+		PlayAttackAnimation(GetDirectionByOffset(HeightOffset, WidthOffset));
 
-		// Case Izquierda
-		if (HeightOffset == 0 && WidthOffset > 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_Left);
-		}
-		
-		// Case Arriba
-		if (HeightOffset < 0 && WidthOffset == 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_Forward);
-		}
-
-		// Case Abajo
-		if (HeightOffset > 0 && WidthOffset == 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_Backward);
-		}
-
-		// Case Arriba Derecha
-		if (HeightOffset < 0 && WidthOffset < 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_FwdRight);
-		}
-
-		// Case Arriba Izquierda
-		if (HeightOffset < 0 && WidthOffset > 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_FwdLeft);
-		}
-
-		// Case Abajo Derecha
-		if (HeightOffset > 0 && WidthOffset < 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_BwdRight);
-		}
-
-		// Case Abajo Derecha
-		if (HeightOffset > 0 && WidthOffset > 0)
-		{
-			PlayAttackAnimation(EDirectionEnum::DE_BwdLeft);
-		}
-
-		Energy -= AttackCost;
 		Tile->Ocupant->OnAttack(this);
 	}
+}
+
+EDirectionEnum AUnit::GetDirectionByOffset(int32 HeightOffset, int32 WidthOffset) const
+{
+	if (HeightOffset == 0 && WidthOffset < 0)
+	{
+		return EDirectionEnum::DE_Right;
+	} 
+
+	if (HeightOffset == 0 && WidthOffset > 0)
+	{
+		return EDirectionEnum::DE_Left;
+	} 
+
+	if (HeightOffset < 0 && WidthOffset == 0)
+	{
+		return EDirectionEnum::DE_Forward;
+	}
+
+	if (HeightOffset > 0 && WidthOffset == 0)
+	{
+		return EDirectionEnum::DE_Backward;
+	}
+
+	if (HeightOffset < 0 && WidthOffset < 0)
+	{
+		return EDirectionEnum::DE_FwdRight;
+	}
+
+	if (HeightOffset < 0 && WidthOffset > 0)
+	{
+		return EDirectionEnum::DE_FwdLeft;
+	}
+
+	if (HeightOffset > 0 && WidthOffset < 0)
+	{
+		return EDirectionEnum::DE_BwdRight;
+	}
+
+	if (HeightOffset > 0 && WidthOffset > 0)
+	{
+		return EDirectionEnum::DE_BwdLeft;
+	}
+
+	return EDirectionEnum::DE_MAX;
 }

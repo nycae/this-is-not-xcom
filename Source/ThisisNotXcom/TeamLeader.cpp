@@ -2,12 +2,10 @@
 
 #include "TeamLeader.h"
 #include "Engine.h"
-#include "UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "GridPathfinder.h"
-#include "Grid.h"
 
 
 ATeamLeader::ATeamLeader()
@@ -21,7 +19,6 @@ ATeamLeader::ATeamLeader()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Capera Component"));
 	Camera->SetupAttachment(RootComponent);
 
-	DisplayInterface();
 }
 
 void ATeamLeader::BeginPlay()
@@ -268,19 +265,15 @@ AUnit* ATeamLeader::SpawnUnit(EUnitTypeEnum UnitClass)
 }
 */
 
+void ATeamLeader::SwitchCamera(ACameraActor* NewCamera)
+{
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(NewCamera, 1.0f);
+
+}
+
 void ATeamLeader::FinishTurn()
 {
-	OnEndTurn.Broadcast(this);
-}
-
-void ATeamLeader::HideInterface()
-{
-	//Interface->RemoveFromViewport();
-}
-
-void ATeamLeader::DisplayInterface()
-{
-	//Interface->AddToViewport();
+	TurnEnd.Broadcast(this);
 }
 
 void ATeamLeader::GrantTurn()
@@ -290,5 +283,25 @@ void ATeamLeader::GrantTurn()
 		Unit->Energy = Unit->MaxEnergy;
 	}
 
-	DisplayInterface();
+	BeginTurn.Broadcast(this);
+}
+
+int64 ATeamLeader::HealthOfUnits() const
+{
+	int64 Health = 0;
+
+	for (const AUnit* Unit : Army)
+	{
+		Health += Unit->Health;
+	}
+
+	return Health;
+}
+
+void ATeamLeader::DebugReset()
+{
+	for (AUnit* Unit : Army)
+	{
+		Unit->Energy = Unit->MaxEnergy;
+	}
 }

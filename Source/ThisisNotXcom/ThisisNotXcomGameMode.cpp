@@ -10,12 +10,13 @@
 #include "EngineUtils.h"
 
 AThisisNotXcomGameMode::AThisisNotXcomGameMode()
-	: State(EGameState::GS_Init), ScoreManager(NewObject<UScoreManager>())
+	: ScoreManager(NewObject<UScoreManager>())
 {
 	PrimaryActorTick.bCanEverTick	=	false;
-	DefaultPawnClass				=	NULL;//ATeamLeader::StaticClass();
+	DefaultPawnClass				=	NULL;
 	PlayerControllerClass			=	AThisisNotXcomPlayerController::StaticClass();
-	TurnHolder						=	0;
+	TurnCounter						=	0;
+	MaxTurns						=	500;
 
 }
 
@@ -23,71 +24,49 @@ void AThisisNotXcomGameMode::BeginPlay()
 {
 	for (TActorIterator<ATeamLeader> Itr(GetWorld()); Itr; ++Itr)
 	{
-		RemainingUnits.Add(*Itr, (*Itr)->Army.Num());
-
 		Teams.Add(*Itr);
-		(*Itr)->OnEndTurn.AddDynamic(this, &AThisisNotXcomGameMode::AttendTurn);
+		(*Itr)->TurnEnd.AddDynamic(this, &AThisisNotXcomGameMode::AttendNewTurn);
 		
 		for (AUnit* Unit : (*Itr)->Army)
 		{
 			Unit->OnDeath.AddDynamic(this, &AThisisNotXcomGameMode::OnUnitDeath);
 		}
 	}
-}
 
-void AThisisNotXcomGameMode::InitFinished()
-{
-	State = EGameState::GS_UnitSetup;
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Player"), FoundActors);
 
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[0] );
-
-}
-
-void AThisisNotXcomGameMode::AfterUnitDeployment()
-{
-	for (TActorIterator<AUnit> Itr(GetWorld()); Itr; ++Itr)
+	if (FoundActors.Num() > 0)
 	{
-		(*Itr)->OnDeath.AddDynamic(this, &AThisisNotXcomGameMode::OnUnitDeath);
+		Cast<ATeamLeader>(FoundActors[0])->GrantTurn();
+	}
+	else
+	{
+		Teams[FMath::Rand() % Teams.Num()]->GrantTurn();
 	}
 }
 
 void AThisisNotXcomGameMode::OnUnitDeath(AUnit* Unit, ATeamLeader* Team)
 {
-	Team->Army.Remove(Unit);
+	Team->Army.Pop(Unit);
 	Team->Score -= 50;
+
+	Unit->Location->Ocupant = nullptr;
+	Unit->Location->State = ETileState::TS_Empty;
+	Unit->SetActorHiddenInGame(true);
 	Unit->MarkPendingKill();
-	
+
+	FString DebugString = FString::Printf( TEXT("Player %s has no %d units"), *Team->PlayerName, Team->Army.Num());
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, DebugString);
+
 	if (Team->Army.Num() <= 0)
 	{
-		OnEndGame();
-	}
-}
+		Teams.Remove(Team);
 
-void AThisisNotXcomGameMode::OnEndOfTurn()
-{
-	if (TurnHolder > 500)
-	{
-		// TODO: Force endgame
-		OnEndGame();
-	}
-
-	TurnHolder++;
-
-	//Teams[TurnHolder % Teams.Num()]->OnNewTurn();
-
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess( Teams[TurnHolder % Teams.Num()] );
-
-}
-
-ATeamLeader* AThisisNotXcomGameMode::GetTeamAt(uint8 Index)
-{
-	if (Teams.Num() > Index)
-	{
-		return Teams[Index];
-	}
-	else
-	{
-		return nullptr;
+		if (Teams.Num() == 1)
+		{
+			FinishGame.Broadcast(Teams[0]);
+		}
 	}
 }
 
@@ -101,10 +80,28 @@ void AThisisNotXcomGameMode::OnEndGame()
 
 ATeamLeader* AThisisNotXcomGameMode::GetTeamTurn()
 {
-	return Teams[TurnHolder % Teams.Num()];
+	return TurnHolder;
 }
 
-void AThisisNotXcomGameMode::AttendTurn(ATeamLeader* Team)
+void AThisisNotXcomGameMode::AttendNewTurn(ATeamLeader* Team)
 {
+	TurnCounter = TurnCounter + 1;
+	TurnHolder = Teams[(Teams.Find(Team) + 1) % Teams.Num()];
 
+	TurnHolder->GrantTurn();
+
+	if (TurnCounter >= MaxTurns)
+	{
+		ATeamLeader* PossibleWinner = TurnHolder;
+
+		for (ATeamLeader* Team : Teams)
+		{
+			if (Team->HealthOfUnits() > PossibleWinner->HealthOfUnits())
+			{
+				PossibleWinner = Team;
+			}
+		}
+
+		FinishGame.Broadcast(PossibleWinner);
+	}
 }

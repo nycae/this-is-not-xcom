@@ -69,6 +69,8 @@ public:
 
 protected:
 
+	EDirectionEnum GetDirectionByOffset(int32 HeightOffset, int32 WidthOffset) const;
+
 	UFUNCTION(BlueprintCallable)
 		FVector GetVectorFromDirection(EDirectionEnum Direction, int32 TileSize) const;
 

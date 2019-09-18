@@ -12,11 +12,12 @@
 AThisisNotXcomGameMode::AThisisNotXcomGameMode()
 	: ScoreManager(NewObject<UScoreManager>())
 {
-	PrimaryActorTick.bCanEverTick	=	false;
+	PrimaryActorTick.bCanEverTick	=	true;
 	DefaultPawnClass				=	NULL;
 	PlayerControllerClass			=	AThisisNotXcomPlayerController::StaticClass();
 	TurnCounter						=	0;
 	MaxTurns						=	500;
+	MaxTurnTime						=	60.0f;
 
 }
 
@@ -33,6 +34,27 @@ void AThisisNotXcomGameMode::BeginPlay()
 		}
 	}
 
+
+}
+
+void AThisisNotXcomGameMode::Tick(float Delta)
+{
+	if (Delta > 1.0f)
+	{
+		PickStarter();
+		LastTurnTimestamp = Delta;
+	}
+	else
+	{
+		if (Delta - LastTurnTimestamp > MaxTurnTime)
+		{
+			AttendNewTurn(TurnHolder);
+		}
+	}
+}
+
+void AThisisNotXcomGameMode::PickStarter()
+{
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Player"), FoundActors);
 
@@ -44,6 +66,7 @@ void AThisisNotXcomGameMode::BeginPlay()
 	{
 		Teams[FMath::Rand() % Teams.Num()]->GrantTurn();
 	}
+
 }
 
 void AThisisNotXcomGameMode::OnUnitDeath(AUnit* Unit, ATeamLeader* Team)
@@ -104,4 +127,6 @@ void AThisisNotXcomGameMode::AttendNewTurn(ATeamLeader* Team)
 
 		FinishGame.Broadcast(PossibleWinner);
 	}
+
+	LastTurnTimestamp = GetWorld()->GetDeltaSeconds();
 }

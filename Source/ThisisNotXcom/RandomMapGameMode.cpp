@@ -3,12 +3,12 @@
 
 #include "RandomMapGameMode.h"
 
-ARandomMapGameMode::ARandomMapGameMode() : AThisisNotXcomGameMode()
+ARandomMapGameMode::ARandomMapGameMode()
 {
 
 }
 
 void ARandomMapGameMode::BeginPlay()
 {
-	AThisisNotXcomGameMode::BeginPlay();
+
 }

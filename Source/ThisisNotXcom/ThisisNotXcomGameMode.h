@@ -24,6 +24,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float Delta) override;
+
 	UFUNCTION(BlueprintCallable)
 		virtual void OnUnitDeath(AUnit* Unit, ATeamLeader* Team);
 
@@ -35,6 +37,8 @@ public:
 
 private:
 
+	float LastTurnTimestamp;
+
 	int32 TurnCounter;
 
 	ATeamLeader* TurnHolder;
@@ -43,6 +47,9 @@ private:
 
 	UScoreManager* ScoreManager;
 
+private:
+
+	void PickStarter();
 
 public:
 
@@ -51,6 +58,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
 		int32 MaxTurns;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
+		float MaxTurnTime;
 
 public:
 

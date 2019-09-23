@@ -22,7 +22,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-		void CarryOnBestActions(AUnit* Unit);
+		void GoForTheWeakest(AUnit* ArgUnit);
 
 	UFUNCTION(BlueprintCallable)
 		void PlayTurn();
@@ -46,47 +46,44 @@ private:
 
 	bool bShouldIAttentATurn = false;
 
-	FPosition WeakestEnemyPosition;
+	AUnit* Unit;
+
+	FPosition UnitPosition;
+
+	TArray<FPosition> EnemyPositions;
+
+	TArray<FPosition> WeakestEnemies;
+
+	TArray<FPosition> NearbyEnemies;
 
 private:
 
-	int32 AllyNearbyHeuristic(const FPosition& Position, TArray<FPosition>& AllyPositions);
+	constexpr int32 Offset(const FPosition& Begin, const FPosition& Target);
 
-	int32 GetNearestEnemies(AUnit* Unit, TArray<FPosition>& Output);
+	int32 FindCloserEnemies();
 
-	int32 GetNearestAllies(AUnit* Unit, TArray<FPosition>& Output);
+	FPosition GetPositionFromPath(const TArray<EDirectionEnum>& Path);
 
-	FPosition FindPositionCloseToAllies(AUnit* Unit, TArray<FPosition>& AllyPositions);
+	TArray<FPosition> GetEnemyPositions();
 
-	FPosition FindPositionCloseToWeakEnemy(AUnit* Unit, TArray<FPosition>& EnemyPositions);
-
-	FPosition FindAttackPositionCloseTo(AUnit* Unit, const FPosition& Position, TArray<FPosition>& EnemyPositions);
-
-	TArray<FPosition> FindEnemyPositions();
-
-	TArray<FPosition> FindAllyPositions();
+	TArray<FPosition> GetAllyPositions();
 
 	TArray<FPosition> GetNearbyPositions(const FPosition& Position);
 
-	TArray<TPair<int32, FPosition>> GetPositionOffsets(AUnit* Unit);
+	TArray<FPosition> FilterPositionsByEnemyHealth();
 
-	TArray<TPair<int32, FPosition>> GetAllyPositionOffsets(AUnit* Unit);
+	bool bIsUnitSurrounded();
 
-	bool bCanItKillANearbyEnemy(AUnit* Unit, TArray<FPosition>& EnemyPositions);
+	bool bCanItKillANearbyEnemy();
 
-	void AttendEnemiesOnSide(AUnit* Unit, TArray<FPosition>& EnemyPositions, TArray<FPosition>& AllyPositions);
+	void MoveTowardsWeakerEnemy();
 
-	void AttendReachableEnemies(AUnit* Unit, TArray<FPosition>& EnemyPositions, TArray<FPosition>& AllyPositions);
+	void AttackSomethingIfYouCan();
 
-	void AttendUnreachableEnemies(AUnit* Unit, TArray<FPosition>& EnemyPositions, TArray<FPosition>& AllyPositions);
+	void AttackWeakestEnemyNearby();
 
-	void Attack(AUnit* Unit, FPosition Position, TArray<FPosition>& EnemyPositions);
+	void Attack(const FPosition& Position);
 
-	void MoveTowardEnemies(AUnit* Unit, TArray<FPosition>& EnemyPositions);
+	void MoveTowards(const FPosition& EnemyPosition);
 
-	void MoveTowardAllies(AUnit* Unit, TArray<FPosition>& AllyPositions);
-
-	void AttackTheWeakest(AUnit* Unit, TArray<FPosition>& EnemyPositions);
-
-	void ExpandFringe(TArray<FPosition> Fringe);
 };

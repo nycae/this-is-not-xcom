@@ -22,6 +22,8 @@ struct FPosition
 
 	bool operator== (const FPosition& Other) const;
 
+	bool operator!= (const FPosition& Other) const;
+
 	bool operator< (const FPosition& Other) const;
 
 	friend FORCEINLINE int32 GetTypeHash(const FPosition& Position)

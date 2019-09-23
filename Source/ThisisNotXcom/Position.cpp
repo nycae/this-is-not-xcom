@@ -13,6 +13,11 @@ bool FPosition::operator==(const FPosition& Other) const
 	return (Row == Other.Row && Column == Other.Column);
 }
 
+bool FPosition::operator!=(const FPosition& Other) const
+{
+	return !operator==(Other);
+}
+
 bool FPosition::operator<(const FPosition& Other) const
 {
 	return (Column > Other.Column) ? false : (Column < Other.Column) ? true : (Row < Other.Row);

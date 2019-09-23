@@ -278,17 +278,17 @@ void ATeamLeader::FinishTurn()
 
 void ATeamLeader::GrantTurn()
 {
-	for (AUnit* Unit : Army)
+	for (auto& Unit : Army)
 	{
-		Unit->Energy = Unit->MaxEnergy;
+		Unit->ReplenishEnergy();
 	}
 
 	BeginTurn.Broadcast(this);
 }
 
-int64 ATeamLeader::HealthOfUnits() const
+int32 ATeamLeader::HealthOfUnits() const
 {
-	int64 Health = 0;
+	int32 Health = 0;
 
 	for (const AUnit* Unit : Army)
 	{
@@ -296,12 +296,4 @@ int64 ATeamLeader::HealthOfUnits() const
 	}
 
 	return Health;
-}
-
-void ATeamLeader::DebugReset()
-{
-	for (AUnit* Unit : Army)
-	{
-		Unit->Energy = Unit->MaxEnergy;
-	}
 }

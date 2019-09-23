@@ -10,6 +10,11 @@ AGrid::AGrid() : Super()
 
 }
 
+ATile* AGrid::At(const FPosition& Position)
+{
+	return Tiles[Position];
+}
+
 void AGrid::AddAtPosition(const FPosition& Position, ATile* Tile)
 {
 	if (Tile)
@@ -24,6 +29,7 @@ void AGrid::AddAtPosition(const FPosition& Position, ATile* Tile)
 }
 
 void AGrid::AddAtCoordinates(int32 Row, int32 Column, ATile* Tile)
+
 {
 	return AddAtPosition(FPosition(Row, Column), Tile);
 }
@@ -65,7 +71,23 @@ TArray<FPosition> AGrid::GetObstructedPositions() const
 			ObstructedTiles.Add(Pair.Key);
 		}
 	}
+
 	return ObstructedTiles;
+}
+
+TArray<FPosition> AGrid::GetOccupiedPositions() const
+{
+	TArray<FPosition> OccupiedTiles;
+
+	for (const auto& Pair : Tiles)
+	{
+		if (Pair.Value->State == ETileState::TS_Occupied)
+		{
+			OccupiedTiles.Add(Pair.Key);
+		}
+	}
+
+	return OccupiedTiles;
 }
 
 void AGrid::SetSpawnPoint(const FPosition& Position)

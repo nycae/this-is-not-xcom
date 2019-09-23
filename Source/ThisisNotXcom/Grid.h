@@ -30,6 +30,9 @@ public:
 public:
 
 	UFUNCTION(BlueprintCallable)
+		ATile* At(const FPosition& Position);
+
+	UFUNCTION(BlueprintCallable)
 		void ObstructPosition(const FPosition& Position);
 
 	UFUNCTION(BlueprintCallable)
@@ -46,6 +49,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FPosition> GetObstructedPositions() const;
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FPosition> GetOccupiedPositions() const;
 
 	UFUNCTION(BlueprintCallable)
 		FPosition GetPosition(const ATile* Tile) const;

@@ -66,8 +66,6 @@ private:
 
 public:
 
-	int32 Score = 0;
-
 	UFUNCTION(BlueprintCallable)
 		void FinishTurn();
 
@@ -78,15 +76,15 @@ public:
 		void CancelSelection();
 
 	UFUNCTION(BlueprintCallable)
-		void DebugReset();
-
-	UFUNCTION(BlueprintCallable)
 		void SwitchCamera(ACameraActor* NewCamera);
 
 	UFUNCTION(BlueprintCallable)
-		int64 HealthOfUnits() const;
+		int32 HealthOfUnits() const;
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scores")
+		int32 Score = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
 		AGrid* CombatGrid;

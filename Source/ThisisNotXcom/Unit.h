@@ -26,19 +26,19 @@ public:
 	AUnit();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		int64 MaxHealth;
+		int32 MaxHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		int64 Health;
+		int32 Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		int64 MaxEnergy;
+		int32 MaxEnergy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		int64 Energy;
+		int32 Energy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		int64 AttackDamage;
+		int32 AttackDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		int32 MaxAttackDepth;
@@ -69,7 +69,7 @@ public:
 
 protected:
 
-	EDirectionEnum GetDirectionByOffset(int32 HeightOffset, int32 WidthOffset) const;
+	EDirectionEnum GetDirectionToTile(ATile* Tile) const;
 
 	UFUNCTION(BlueprintCallable)
 		FVector GetVectorFromDirection(EDirectionEnum Direction, int32 TileSize) const;
@@ -77,7 +77,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		FRotator GetRotationByDirection(EDirectionEnum Direction) const;
 
+	UFUNCTION(BlueprintCallable)
+		void NotifyDeath();
+
 public:
+
+	UFUNCTION(BlueprintCallable)
+		bool bIsTileReachable(ATile* Tile) const;
 
 	UFUNCTION(BlueprintCallable)
 		float GetHealthPercentage() const;
@@ -86,7 +92,7 @@ public:
 		float GetEnergyPercentage() const;
 
 	UFUNCTION(BlueprintCallable)
-		int GetMaxMoveDepth() const;
+		void ReplenishEnergy();
 
 	UFUNCTION(BlueprintCallable)
 		int OnAttack(AUnit* Attacker);
@@ -117,5 +123,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations", BlueprintCallable)
 		void PlayAttackMontage();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations", BlueprintCallable)
+		void PlayDeathMontage();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations", BlueprintCallable)
+		void PlayErrorSpeech();
 
 };

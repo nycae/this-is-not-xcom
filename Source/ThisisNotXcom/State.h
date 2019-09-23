@@ -19,6 +19,8 @@ public:
 
 	FString ToString() const;
 
+	bool operator== (const State& Other) const;
+
 private:
 
 	FPosition Position;

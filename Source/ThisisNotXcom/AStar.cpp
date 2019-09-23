@@ -32,26 +32,50 @@ bool AStar::isPossiblePathExisting(const FPosition& InitialState)
 	}
 
 	return false;
+}
 
+bool AStar::isPossiblePathExisting(const FPosition& InitialState, const FPosition& FinalState)
+{
+	State StateBuffer;
+
+	StateCollection.HeapPush(State(InitialState), StatePredicate());
+
+	while ( StateCollection.Num() > 0 )
+	{
+		StateCollection.HeapPop(StateBuffer, StatePredicate());
+
+		Visited[StateBuffer.GetIndex(MaxX)] = true;
+
+		if (StateBuffer == FinalState)
+		{
+			return true;
+		}
+		else
+		{
+			ExploreNewLevel(StateBuffer);
+		}
+	}
+
+	return false;
 }
 
 void AStar::ExploreNewLevel(const State& StateArg)
 {
-	FPosition RightNeighbour(StateArg.GetPosition().Row + 1, StateArg.GetPosition().Column);
-	FPosition LeftNeighbour (StateArg.GetPosition().Row - 1, StateArg.GetPosition().Column);
-	FPosition UpperNeighbour(StateArg.GetPosition().Row, StateArg.GetPosition().Column + 1);
-	FPosition LowerNeighbour(StateArg.GetPosition().Row, StateArg.GetPosition().Column - 1);
+	const FPosition RightNeighbour(StateArg.GetPosition().Row + 1, StateArg.GetPosition().Column);
+	const FPosition LeftNeighbour (StateArg.GetPosition().Row - 1, StateArg.GetPosition().Column);
+	const FPosition UpperNeighbour(StateArg.GetPosition().Row, StateArg.GetPosition().Column + 1);
+	const FPosition LowerNeighbour(StateArg.GetPosition().Row, StateArg.GetPosition().Column - 1);
 
-	State RightNeighbourState(RightNeighbour);
-	State LeftNeighbourState(LeftNeighbour);
-	State UpperNeighbourState(UpperNeighbour);
-	State LowerNeighbourState(LowerNeighbour);
+	const State RightNeighbourState(RightNeighbour);
+	const State LeftNeighbourState(LeftNeighbour);
+	const State UpperNeighbourState(UpperNeighbour);
+	const State LowerNeighbourState(LowerNeighbour);
 
 	if ((int64)RightNeighbourState.GetIndex(MaxX) < Visited.Num())
 	{	
 		if (!Visited[RightNeighbourState.GetIndex(MaxX)]
 			&&
-			!BattleGrid->isObstructed(RightNeighbour))
+			BattleGrid->isEmpty(RightNeighbour))
 		{
 			StateCollection.HeapPush(RightNeighbourState, StatePredicate());
 		}
@@ -62,7 +86,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	{
 		if (!Visited[LeftNeighbourState.GetIndex(MaxX)]
 			&&
-			!BattleGrid->isObstructed(LeftNeighbour))
+			BattleGrid->isEmpty(LeftNeighbour))
 		{
 			StateCollection.HeapPush(LeftNeighbourState, StatePredicate());
 		}
@@ -72,7 +96,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	{
 		if (!Visited[UpperNeighbourState.GetIndex(MaxX)]
 			&&
-			!BattleGrid->isObstructed(UpperNeighbour)) 
+			BattleGrid->isEmpty(UpperNeighbour)) 
 		{
 			StateCollection.HeapPush(UpperNeighbourState, StatePredicate());
 		}
@@ -83,7 +107,7 @@ void AStar::ExploreNewLevel(const State& StateArg)
 	{
 		if (!Visited[LowerNeighbourState.GetIndex(MaxX)]
 			&&
-			!BattleGrid->isObstructed(LowerNeighbour))
+			BattleGrid->isEmpty(LowerNeighbour))
 		{
 			StateCollection.HeapPush(LowerNeighbour, StatePredicate());
 		}

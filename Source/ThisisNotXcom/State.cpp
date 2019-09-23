@@ -41,3 +41,8 @@ FString State::ToString() const
 
 	return Str;
 }
+
+bool State::operator==(const State& Other) const
+{
+	return Position == Other.Position;
+}

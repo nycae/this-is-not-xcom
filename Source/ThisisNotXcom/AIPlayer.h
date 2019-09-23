@@ -38,6 +38,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
 		ATeamLeader* Team = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
+		int32 MapMaxX = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map assets")
+		int32 MapMaxY = 8;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -48,37 +54,34 @@ private:
 
 	AUnit* Unit;
 
+	UPROPERTY(VisibleAnywhere, Category = "Debug assets")
+		FPosition TargetPosition;
+
 	FPosition UnitPosition;
 
 	TArray<FPosition> EnemyPositions;
-
-	TArray<FPosition> WeakestEnemies;
-
-	TArray<FPosition> NearbyEnemies;
 
 private:
 
 	constexpr int32 Offset(const FPosition& Begin, const FPosition& Target);
 
-	int32 FindCloserEnemies();
+	FPosition GetRegroupPosition();
+
+	FPosition GetPositionCloseToObjective();
 
 	FPosition GetPositionFromPath(const TArray<EDirectionEnum>& Path);
 
 	TArray<FPosition> GetEnemyPositions();
 
-	TArray<FPosition> GetAllyPositions();
-
 	TArray<FPosition> GetNearbyPositions(const FPosition& Position);
 
-	TArray<FPosition> FilterPositionsByEnemyHealth();
+	bool bCanReachObjective();
 
-	bool bIsUnitSurrounded();
+	bool bHasEnemiesNearby();
 
-	bool bCanItKillANearbyEnemy();
+	void FindNewObjective();
 
-	void MoveTowardsWeakerEnemy();
-
-	void AttackSomethingIfYouCan();
+	void MoveTowardsObjective();
 
 	void AttackWeakestEnemyNearby();
 

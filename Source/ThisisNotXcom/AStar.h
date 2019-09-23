@@ -23,6 +23,8 @@ public:
 
 	bool isPossiblePathExisting(const FPosition& InitialState);
 
+	bool isPossiblePathExisting(const FPosition& InitialState, const FPosition& FinalState);
+
 private:
 
 	TArray<State> StateCollection;

@@ -43,7 +43,6 @@ void AAIPlayer::PlayTurn()
 
 void AAIPlayer::TimerForDelayedExecution(TArray<AUnit*> Units)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "Atending unit");
 	FTimerHandle UnusedHandle;
 	FTimerDelegate BindedFunction;
 
@@ -56,7 +55,8 @@ void AAIPlayer::TimerForDelayedExecution(TArray<AUnit*> Units)
 	}
 	else
 	{
-		Team->FinishTurn();
+		BindedFunction.BindUFunction(Team, FName("FinishTurn"), Units);
+		GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 8.0f);
 	}
 	
 }
@@ -70,7 +70,7 @@ void AAIPlayer::GoForTheWeakest(AUnit* ArgUnit)
 
 	FindNewObjective();
 	
-	if (bHasEnemiesNearby())
+	while (bHasEnemiesNearby() && Unit->Energy >= Unit->AttackCost)
 	{
 		AttackWeakestEnemyNearby();
 	}
@@ -79,8 +79,6 @@ void AAIPlayer::GoForTheWeakest(AUnit* ArgUnit)
 	{
 		MoveTowardsObjective();
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "Unit Cant do more");
 }
 
 TArray<FPosition> AAIPlayer::GetEnemyPositions()
@@ -115,7 +113,7 @@ TArray<FPosition> AAIPlayer::GetNearbyPositions(const FPosition& Position)
 		}
 	}
 
-	return Candidates;
+	return Finales;
 }
 
 FPosition AAIPlayer::GetRegroupPosition()
@@ -142,18 +140,40 @@ FPosition AAIPlayer::GetRegroupPosition()
 FPosition AAIPlayer::GetPositionCloseToObjective()
 {
 	int32 CurrentOffset;
+	int32 IndexMax;
 	FPosition FinalPosition;
 
-	int32 MinOffset = TNumericLimits<int32>::Max();
+	int32 MaxOffset = 0;
+	TArray<FPosition> PossiblePositions = GetNearbyPositions(TargetPosition);
 
-	for (const auto& Position : GetNearbyPositions(TargetPosition))
+	for (int32 Depth = 1; Depth < Unit->MaxAttackDepth; Depth++)
 	{
-		CurrentOffset = Offset(UnitPosition, Position);
-
-		if (CurrentOffset < MinOffset)
+		IndexMax = PossiblePositions.Num();
+		
+		for (int32 Index = 0; Index < IndexMax; Index++)
 		{
-			MinOffset = CurrentOffset;
-			FinalPosition = Position;
+			for (const auto& Position : GetNearbyPositions(PossiblePositions[Index]))
+			{
+				PossiblePositions.AddUnique(Position);
+			}
+		}
+	}
+
+	for (const auto& Position : PossiblePositions)
+	{
+		if (Grid->At(Position)->State == ETileState::TS_Empty
+			&&
+			AStar(Grid, MapMaxX, MapMaxX).isPossiblePathExisting(UnitPosition, Position))
+		{
+			CurrentOffset = Offset(UnitPosition, Position);
+
+			if (CurrentOffset > MaxOffset
+				&&
+				MaxOffset <= Unit->MaxAttackDepth)
+			{
+				MaxOffset = CurrentOffset;
+				FinalPosition = Position;
+			}
 		}
 	}
 	
@@ -191,7 +211,6 @@ FPosition AAIPlayer::GetPositionFromPath(const TArray<EDirectionEnum>& Path)
 
 void AAIPlayer::AttackWeakestEnemyNearby()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "AttackingNewObjective");
 	FPosition FinalPosition;
 	int32 MinHealth = TNumericLimits<int32>::Max();
 
@@ -213,6 +232,8 @@ void AAIPlayer::AttackWeakestEnemyNearby()
 
 void AAIPlayer::Attack(const FPosition& Position)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, FString::Printf(TEXT("Unit at [%d, %d] is attacking [%d, %d]"),
+		UnitPosition.Row, UnitPosition.Column, Position.Row, Position.Column));
 	while (	Grid->At(Position)->Ocupant != nullptr
 			&&
 			Unit->Energy >= Unit->AttackCost)
@@ -240,7 +261,6 @@ void AAIPlayer::MoveTowards(const FPosition& Position)
 
 	FinalPosition = GetPositionFromPath(Path);
 	UnitPosition = FinalPosition;
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Unit should move to [%d, %d]"), FinalPosition.Row, FinalPosition.Column));
 	Unit->MoveTo(Grid->At(FinalPosition));
 }
 
@@ -248,12 +268,10 @@ void AAIPlayer::MoveTowardsObjective()
 {
 	if (bCanReachObjective())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Black, FString::Printf(TEXT("Unit is heading to [%d, %d]") ,TargetPosition.Row, TargetPosition.Column));
 		MoveTowards(GetPositionCloseToObjective());
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Black, "Unit is retreating");
 		MoveTowards(GetRegroupPosition());
 	}
 }

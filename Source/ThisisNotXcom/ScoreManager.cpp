@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ScoreManager.h"
@@ -8,16 +9,24 @@ UScoreManager::UScoreManager()
 {
 	FString File;
 
-	if (FFileHelper::LoadFileToString(File, *(FPaths::ProjectDir() + "/Scores.txt"))) {
-		TArray<FString> Lines;
-		File.ParseIntoArray(Lines, _T("\n"), true);
+	if (FPaths::FileExists(*(FPaths::ProjectDir() + "/Scores.txt")))
+	{
+		if (FFileHelper::LoadFileToString(File, *(FPaths::ProjectDir() + "/Scores.txt")))
+		{
+			TArray<FString> Lines;
+			File.ParseIntoArray(Lines, _T("\n"), true);
 
-		for (const auto& Line : Lines) {
+			for (const auto& Line : Lines) 
+			{
 
-			TArray<FString> Pair;
-			Line.ParseIntoArray(Pair, TEXT(" "), true);
+				TArray<FString> Pair;
+				Line.ParseIntoArray(Pair, TEXT(" "), true);
 
-			Scores.Add(Pair[0], FCString::Atoi(*Pair[1]));
+				if (Pair.Num() >= 2)
+				{
+					Scores.Add(Pair[0], FCString::Atoi(*Pair[1]));
+				}
+			}
 		}
 	}
 }

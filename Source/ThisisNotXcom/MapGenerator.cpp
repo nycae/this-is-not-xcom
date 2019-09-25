@@ -14,7 +14,7 @@ void AMapGenerator::GenerateBlockingPattern()
 {
 	for (int I = 0; I < SideSizeX - 1; I++) 
 	{
-		for (int J = 0; J < SideSizeY - 1 - I; J++) 
+		for (int J = 0; J < SideSizeY - I - 1; J++) 
 		{
 			if (BlockChance > FMath::FRandRange(0.0, 1.0))
 			{
@@ -41,10 +41,14 @@ void AMapGenerator::FixPattern()
 
 void AMapGenerator::SpawnBlockingMeshes()
 {
-	for (const auto& BlockedTile : CombatGrid->GetObstructedPositions())
+	for (const auto& TilePosition : CombatGrid->GetObstructedPositions())
 	{
-		ObstructingStructure->AddInstance(FTransform
-			(FVector(BlockedTile.Row * CombatGrid->TileSize, BlockedTile.Column * CombatGrid->TileSize, -10.0) + StartingPosition));
+		ObstructingStructure->AddInstance(
+			FTransform(
+				//CombatGrid->At(BlockedTile)->GetActorLocation()
+				FVector(TilePosition.Row * CombatGrid->TileSize * 2, TilePosition.Column * CombatGrid->TileSize * 2, -10.0f) + StartingPosition
+			)
+		);
 	}
 }
 
@@ -54,25 +58,35 @@ void AMapGenerator::GenerateGround()
 	{
 		for (int J = 0; J < SideSizeY; J++)
 		{
-			CombatGrid->AddAtCoordinates(I, J, SpawnFloor
-				(FVector(I * CombatGrid->TileSize, J * CombatGrid->TileSize, -60.0) + StartingPosition));
+			CombatGrid->AddAtCoordinates(I, J, 
+				SpawnFloor(
+					FVector(I * CombatGrid->TileSize, J * CombatGrid->TileSize, 0.0f) + StartingPosition)
+			);
 		}
 	}
 
 	for (const auto& Position : AditionalTiles)
 	{
-		if( ((Position.Row < 0) && (Position.Column < 0))
-			||
-			((Position.Row >= SideSizeX) && (Position.Column >= SideSizeY)) )
+		if( ((Position.Row < 0) && (Position.Column < 0)) || ((Position.Row >= SideSizeX) && (Position.Column >= SideSizeY)) )
 		{
-			CombatGrid->AddAtPosition(Position, SpawnFloor
-				(FVector(Position.Row * CombatGrid->TileSize, Position.Column * CombatGrid->TileSize, -60.0) + StartingPosition));
+			CombatGrid->AddAtPosition(Position, SpawnFloor(FVector(
+				Position.Row * CombatGrid->TileSize, Position.Column * CombatGrid->TileSize, 0.0f) + StartingPosition));
 		}
 	}
 }
 
 void AMapGenerator::GenerateFinalGround()
 {
+
+	SpawnBlockingMeshes();
+}
+
+void AMapGenerator::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GenerateGround();
+
 	GenerateBlockingPattern();
 
 	if (!AStar(CombatGrid, SideSizeX, SideSizeY).isPossiblePathExisting(FPosition(0, 0)))
@@ -81,14 +95,6 @@ void AMapGenerator::GenerateFinalGround()
 	}
 
 	SpawnBlockingMeshes();
-}
-
-void AMapGenerator::BeginPlay()
-{
-	AActor::BeginPlay();
-
-	GenerateGround();
-
 }
 
 ATile* AMapGenerator::SpawnFloor(const FVector& Position)

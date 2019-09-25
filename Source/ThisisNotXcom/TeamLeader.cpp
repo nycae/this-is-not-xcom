@@ -158,6 +158,11 @@ void ATeamLeader::CancelSelection()
 
 void ATeamLeader::AttendTile(ATile* Tile)
 {
+	if (Tile->State == ETileState::TS_Obstructed)
+	{
+		return;
+	}
+
 	if (!Tile->Ocupant || Tile->Ocupant->Team != this)
 	{
 		if (ObjectiveTile.IsValid())

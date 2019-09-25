@@ -9,9 +9,10 @@
 
 
 AUnit::AUnit() 
-	: Super()
+	: Super(), MeshComponent(CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent")))
 {
  	PrimaryActorTick.bCanEverTick = false;
+
 }
 
 FVector AUnit::GetVectorFromDirection(EDirectionEnum Direction, int32 TileSize) const
@@ -90,12 +91,9 @@ void AUnit::MoveTo(ATile* Tile)
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGrid::StaticClass(), FoundActors);
 
-	TArray<EDirectionEnum> MovementList = 
-		GridPathfinder::GetPath(Location, Tile, Energy / MovementCost, Cast<AGrid>(FoundActors[0]));
+	TArray<EDirectionEnum> MovementList = GridPathfinder::GetPath(Location, Tile, Energy / MovementCost, Cast<AGrid>(FoundActors[0]));
 
-	if (Tile->State == ETileState::TS_Empty
-		&&
-		MovementList.Num() > 0)
+	if (Tile->State == ETileState::TS_Empty && MovementList.Num() > 0)
 	{
 		Team->CancelSelection();
 		PlayMovementAnimation(MovementList);
@@ -117,11 +115,7 @@ void AUnit::MoveTo(ATile* Tile)
 
 void AUnit::Attack(ATile* Tile)
 {
-	if (Tile->State == ETileState::TS_Occupied 
-		&&
-		Energy >= AttackCost
-		&&
-		bIsTileReachable(Tile))
+	if (Tile->State == ETileState::TS_Occupied && Energy >= AttackCost && bIsTileReachable(Tile))
 	{
 		Team->CancelSelection();
 		PlayAttackAnimation(GetDirectionToTile(Tile));
@@ -150,12 +144,12 @@ EDirectionEnum AUnit::GetDirectionToTile(ATile* Tile) const
 	const int32 HeightOffset = MyLocation.X - TargetLocation.X;
 	const int32 WidthOffset = MyLocation.Y - MyLocation.Y;
 
-	if (HeightOffset == 0 && WidthOffset < 0)
+	if (HeightOffset == 0 && WidthOffset > 0)
 	{
 		return EDirectionEnum::DE_Right;
 	} 
 
-	if (HeightOffset == 0 && WidthOffset > 0)
+	if (HeightOffset == 0 && WidthOffset < 0)
 	{
 		return EDirectionEnum::DE_Left;
 	} 
@@ -170,22 +164,22 @@ EDirectionEnum AUnit::GetDirectionToTile(ATile* Tile) const
 		return EDirectionEnum::DE_Backward;
 	}
 
-	if (HeightOffset < 0 && WidthOffset < 0)
+	if (HeightOffset < 0 && WidthOffset > 0)
 	{
 		return EDirectionEnum::DE_FwdRight;
 	}
 
-	if (HeightOffset < 0 && WidthOffset > 0)
+	if (HeightOffset < 0 && WidthOffset < 0)
 	{
 		return EDirectionEnum::DE_FwdLeft;
 	}
 
-	if (HeightOffset > 0 && WidthOffset < 0)
+	if (HeightOffset > 0 && WidthOffset > 0)
 	{
 		return EDirectionEnum::DE_BwdRight;
 	}
 
-	if (HeightOffset > 0 && WidthOffset > 0)
+	if (HeightOffset > 0 && WidthOffset < 0)
 	{
 		return EDirectionEnum::DE_BwdLeft;
 	}
@@ -193,42 +187,20 @@ EDirectionEnum AUnit::GetDirectionToTile(ATile* Tile) const
 	return EDirectionEnum::DE_MAX;
 }
 
+const TMap<EDirectionEnum, FRotator> RotationsMap =
+{
+	{EDirectionEnum::DE_Right,		{0.0f,	  0.0f,	0.0f}},
+	{EDirectionEnum::DE_BwdRight,	{0.0f,	 45.0f,	0.0f}},
+	{EDirectionEnum::DE_Backward,	{0.0f,   90.0f,	0.0f}},
+	{EDirectionEnum::DE_BwdLeft,	{0.0f,	135.0f,	0.0f}},
+	{EDirectionEnum::DE_Left,		{0.0f,  180.0f,	0.0f}},
+	{EDirectionEnum::DE_FwdLeft,	{0.0f,	225.0f, 0.0f}},
+	{EDirectionEnum::DE_Forward,	{0.0f,	270.0f,	0.0f}},
+	{EDirectionEnum::DE_FwdRight,	{0.0f,	315.0f,	0.0f}},
+	{EDirectionEnum::DE_MAX,		{0.0f,  180.0f,	0.0f}}
+};
+
 FRotator AUnit::GetRotationByDirection(EDirectionEnum Direction) const
 {
-	switch (Direction)
-	{
-	case EDirectionEnum::DE_Forward:
-		return FRotator(0.0f, 0.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_Backward:
-		return FRotator(0.0f, 180.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_Left:
-		return FRotator(0.0f, -90.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_Right:
-		return FRotator(0.0f, 90.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_FwdLeft:
-		return FRotator(0.0f, 45.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_FwdRight:
-		return FRotator(0.0f, -45.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_BwdLeft:
-		return FRotator(0.0f, -135.0f, 0.0f);
-		break;
-
-	case EDirectionEnum::DE_BwdRight:
-		return FRotator(0.0f, 135.0f, 0.0f);
-		break;
-	}
-
-	return FRotator();
+	return RotationsMap[Direction];
 }

@@ -155,7 +155,7 @@ void AGrid::ObstructPosition(const FPosition& Position)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Esa posición no existe");
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Position [%d, %d] does not exist"), Position.Row, Position.Column));
 	}
 }
 

@@ -8,7 +8,7 @@
 #include "UnitManager.generated.h"
 
 
-class ATeamLeader;
+class ASpawnerTeamLeader;
 
 
 UENUM(BlueprintType)
@@ -35,6 +35,12 @@ struct FMeshKey
 {
 	GENERATED_BODY()
 
+	FMeshKey(ETeamEnum ArgTeam = ETeamEnum::TE_MAX, EUnitTypeEnum ArgType = EUnitTypeEnum::TCE_MAX)
+	{
+		Team = ArgTeam;
+		Type = ArgType;
+	};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		ETeamEnum Team;
 
@@ -51,6 +57,11 @@ struct FMeshKey
 	bool operator< (FMeshKey Other) const
 	{
 		return (Team < Other.Team) ? true : (Team > Other.Team) ? false : (Type > Other.Type) ;
+	};
+
+	bool operator== (FMeshKey Other) const
+	{
+		return (Team == Other.Team && Type == Other.Type);
 	};
 };
 
@@ -70,12 +81,12 @@ public:
 		TMap<EUnitTypeEnum, TSubclassOf<AActor>> UnitClasses;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Unit Config")
-		TMap<EUnitTypeEnum, int32> UnitCount;
+		TMap<EUnitTypeEnum, int32> MaxUnits;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Teams")
 		TMap<FMeshKey, USkeletalMesh*> TeamMeshes; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Teams")
-		TMap<ETeamEnum, ATeamLeader*> Teams;
+		TMap<ASpawnerTeamLeader*, ETeamEnum> TeamColors;
 
 };

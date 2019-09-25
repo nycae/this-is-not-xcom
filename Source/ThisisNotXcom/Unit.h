@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Direction.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Pawn.h"
 #include "Position.h"
 #include "Unit.generated.h"
 
@@ -17,13 +17,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUnitDie, AUnit*, Unit, ATeamLead
 
 
 UCLASS()
-class THISISNOTXCOM_API AUnit : public ACharacter
+class THISISNOTXCOM_API AUnit : public APawn
 {
 	GENERATED_BODY()
 
 public:
 
 	AUnit();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skeletal mesh")
+		USkeletalMeshComponent* MeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		int32 MaxHealth;

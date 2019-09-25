@@ -56,7 +56,7 @@ void AAIPlayer::TimerForDelayedExecution(TArray<AUnit*> Units)
 	else
 	{
 		BindedFunction.BindUFunction(Team, FName("FinishTurn"), Units);
-		GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 8.0f);
+		GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 1.0f);
 	}
 	
 }
@@ -261,7 +261,11 @@ void AAIPlayer::MoveTowards(const FPosition& Position)
 
 	FinalPosition = GetPositionFromPath(Path);
 	UnitPosition = FinalPosition;
-	Unit->MoveTo(Grid->At(FinalPosition));
+
+	if (Grid->Tiles.Contains(FinalPosition))
+	{
+		Unit->MoveTo(Grid->At(FinalPosition));
+	}
 }
 
 void AAIPlayer::MoveTowardsObjective()

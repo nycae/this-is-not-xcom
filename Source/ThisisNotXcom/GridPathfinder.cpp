@@ -3,8 +3,13 @@
 #include "GridPathfinder.h"
 #include "Engine.h"
 
-constexpr EDirectionEnum EveryDirection[] =
-	{ EDirectionEnum::DE_Backward, EDirectionEnum::DE_Forward, EDirectionEnum::DE_Left, EDirectionEnum::DE_Right };
+const EDirectionEnum EveryDirection[] =
+{ 
+	EDirectionEnum::DE_Backward, 
+	EDirectionEnum::DE_Forward, 
+	EDirectionEnum::DE_Left, 
+	EDirectionEnum::DE_Right 
+};
 
 
 TArray<EDirectionEnum> GridPathfinder::GetPath
@@ -16,14 +21,44 @@ TArray<EDirectionEnum> GridPathfinder::GetPath
 TArray<EDirectionEnum> GridPathfinder::GetPath
 	(const FPosition& Origin, const FPosition& Destiny, int32 MaxDepth, const AGrid* Grid)
 {
-	if (!Grid->isEmpty(Destiny) || MaxDepth == 0)
+	if (!Grid->isEmpty(Destiny) || MaxDepth <= 0 || Origin == Destiny)
 	{
 		return TArray<EDirectionEnum>();
 	}
 
-	TArray<TArray<EDirectionEnum>> PossiblePaths;
+	TQueue<TArray<EDirectionEnum>> PossiblePaths;
+	TArray<EDirectionEnum> NewPath;
 
-	/* First exploration */
+	for (const auto Direction : EveryDirection)
+	{
+		PossiblePaths.Enqueue({Direction});
+	}
+
+	while (!PossiblePaths.IsEmpty())
+	{
+		PossiblePaths.Dequeue(NewPath);
+
+		const FPosition	PathPosition = GetWhereAmI(Origin, NewPath);
+
+		if (NewPath.Num() <= MaxDepth && Grid->isEmpty(PathPosition))
+		{
+			if (PathPosition == Destiny)
+			{
+				return NewPath;
+			}
+			else
+			{
+				for (const auto& Direction : EveryDirection)
+				{
+					TArray<EDirectionEnum> InsertionBuffer(NewPath);
+					InsertionBuffer.Add(Direction);
+					PossiblePaths.Enqueue(InsertionBuffer);
+				}
+			}
+		}
+	}
+
+	/*
 	for (const auto& Direction : EveryDirection)
 	{
 		TArray<EDirectionEnum> NewPath{ Direction };
@@ -41,7 +76,6 @@ TArray<EDirectionEnum> GridPathfinder::GetPath
 		}
 	}
 
-	/* Aquí es donde ocurre la explosión combinatoria */
 	for (uint8 CurrentDepth = 1; CurrentDepth < MaxDepth; CurrentDepth++)
 	{
 		uint32 StartingPathsIndex = PossiblePaths.Num(); // Needed because Possible Paths will grow
@@ -67,6 +101,7 @@ TArray<EDirectionEnum> GridPathfinder::GetPath
 			}
 		}
 	}
+	*/
 
 	return TArray<EDirectionEnum>();
 }
@@ -100,7 +135,6 @@ FPosition GridPathfinder::GetWhereAmI
 	}
 
 	return Origin;
-
 }
 
 void GridPathfinder::PrintPath(const TArray<EDirectionEnum>& Path)

@@ -12,14 +12,14 @@ AMapGenerator::AMapGenerator()
 
 void AMapGenerator::GenerateBlockingPattern()
 {
-	for (int I = 0; I < SideSizeX - 1; I++) 
+	for (int I = 0; I < SideSizeX; I++) 
 	{
-		for (int J = 0; J < SideSizeY - I - 1; J++) 
+		for (int J = 0; J < SideSizeY - I; J++) 
 		{
 			if (BlockChance > FMath::FRandRange(0.0, 1.0))
 			{
 				CombatGrid->ObstructPosition(FPosition(I, J));
-				CombatGrid->ObstructPosition(FPosition(((SideSizeX - 1) - J), ((SideSizeY - 1) - I)));
+				CombatGrid->ObstructPosition(FPosition((SideSizeY) - J - 1, (SideSizeX) - I - 1));
 			}
 		}
 	}
@@ -27,7 +27,7 @@ void AMapGenerator::GenerateBlockingPattern()
 
 void AMapGenerator::FixPattern()
 {
-	for (int32 i = 2; i < FMath::Min(SideSizeX, SideSizeY); i++) 
+	for (int32 i = 0; i < FMath::Min(SideSizeX, SideSizeY); i++) 
 	{
 		CombatGrid->FreeCoordinate(FPosition(i, i));
 
@@ -43,12 +43,7 @@ void AMapGenerator::SpawnBlockingMeshes()
 {
 	for (const auto& TilePosition : CombatGrid->GetObstructedPositions())
 	{
-		ObstructingStructure->AddInstance(
-			FTransform(
-				//CombatGrid->At(BlockedTile)->GetActorLocation()
-				FVector(TilePosition.Row * CombatGrid->TileSize * 2, TilePosition.Column * CombatGrid->TileSize * 2, -10.0f) + StartingPosition
-			)
-		);
+		ObstructingStructure->AddInstance(FTransform(FVector(TilePosition.Row * CombatGrid->TileSize * 2, TilePosition.Column * CombatGrid->TileSize * 2, -10.0f) + StartingPosition));
 	}
 }
 
@@ -58,10 +53,7 @@ void AMapGenerator::GenerateGround()
 	{
 		for (int J = 0; J < SideSizeY; J++)
 		{
-			CombatGrid->AddAtCoordinates(I, J, 
-				SpawnFloor(
-					FVector(I * CombatGrid->TileSize, J * CombatGrid->TileSize, 0.0f) + StartingPosition)
-			);
+			CombatGrid->AddAtCoordinates(I, J, SpawnFloor(FVector(I * CombatGrid->TileSize, J * CombatGrid->TileSize, 0.0f) + StartingPosition));
 		}
 	}
 
@@ -69,16 +61,9 @@ void AMapGenerator::GenerateGround()
 	{
 		if( ((Position.Row < 0) && (Position.Column < 0)) || ((Position.Row >= SideSizeX) && (Position.Column >= SideSizeY)) )
 		{
-			CombatGrid->AddAtPosition(Position, SpawnFloor(FVector(
-				Position.Row * CombatGrid->TileSize, Position.Column * CombatGrid->TileSize, 0.0f) + StartingPosition));
+			CombatGrid->AddAtPosition(Position, SpawnFloor(FVector(Position.Row * CombatGrid->TileSize, Position.Column * CombatGrid->TileSize, 0.0f) + StartingPosition));
 		}
 	}
-}
-
-void AMapGenerator::GenerateFinalGround()
-{
-
-	SpawnBlockingMeshes();
 }
 
 void AMapGenerator::BeginPlay()
@@ -99,5 +84,9 @@ void AMapGenerator::BeginPlay()
 
 ATile* AMapGenerator::SpawnFloor(const FVector& Position)
 {
-	return (ATile*) GetWorld()->SpawnActor(FloorClass, &Position);
+	ATile* Tile = Cast<ATile>(GetWorld()->SpawnActor(FloorClass,&Position));
+	# if WITH_EDITOR
+		Tile->SetFolderPath("Tiles");
+	# endif
+	return Tile;
 }

@@ -65,7 +65,7 @@ private:
 
 	constexpr int32 Offset(const FPosition& Begin, const FPosition& Target);
 
-	FPosition GetRegroupPosition();
+	FPosition GetSideObjective();
 
 	FPosition GetPositionCloseToObjective();
 

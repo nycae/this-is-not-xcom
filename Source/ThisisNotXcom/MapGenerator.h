@@ -35,11 +35,6 @@ private:
 
 public:
 
-	UFUNCTION(BlueprintCallable)
-		void GenerateFinalGround();
-
-public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Elements")
 		AGrid* CombatGrid;
 

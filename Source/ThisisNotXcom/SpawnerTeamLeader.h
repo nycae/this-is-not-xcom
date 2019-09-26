@@ -9,7 +9,7 @@
 #include "SpawnerTeamLeader.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAfterUnitSpawn, ASpawnerTeamLeader*, Team, AUnit*, Unit, EUnitTypeEnum, UnitType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAfterUnitSpawn, ATile*, Tile, EUnitTypeEnum, UnitType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNoSpawnsLeftover, EUnitTypeEnum, UnitType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndOfSpawns, ASpawnerTeamLeader*, Team);
 
@@ -37,6 +37,10 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Event dispacher")
 		FOnEndOfSpawns OnEndOfSpawns;
+
+private:
+
+	AUnit* CreateUnit(EUnitTypeEnum UnitType, const FPosition& Position);
 
 public:
 

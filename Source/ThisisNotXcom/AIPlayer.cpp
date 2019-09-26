@@ -70,15 +70,16 @@ void AAIPlayer::GoForTheWeakest(AUnit* ArgUnit)
 
 	FindNewObjective();
 	
-	while (bHasEnemiesNearby() && Unit->Energy >= Unit->AttackCost)
+
+	if (bHasEnemiesNearby())
 	{
 		AttackWeakestEnemyNearby();
 	}
-	
-	if (Unit->Energy >= Unit->MovementCost)
+	else
 	{
 		MoveTowardsObjective();
 	}
+
 }
 
 TArray<FPosition> AAIPlayer::GetEnemyPositions()
@@ -116,37 +117,47 @@ TArray<FPosition> AAIPlayer::GetNearbyPositions(const FPosition& Position)
 	return Finales;
 }
 
-FPosition AAIPlayer::GetRegroupPosition()
+FPosition AAIPlayer::GetSideObjective()
 {
-	int32 CurrentOffset = 0;
+	int32 MinOffset = TNumericLimits<int32>::Max();
 
-	for (const auto& AllyUnit : Team->Army)
+	int32 CurrentOffset;
+	TArray<FPosition> FinalPositions = {UnitPosition};
+
+	for (const auto& EnemyPosition : EnemyPositions)
 	{
-		if (AllyUnit != Unit)
+		for (const auto& Position : GetNearbyPositions(EnemyPosition))
 		{
-			for (const auto& NearbyPosition : GetNearbyPositions(UnitPosition))
+			CurrentOffset = Offset(UnitPosition, Position);
+
+			if (CurrentOffset < MinOffset)
 			{
-				if (AStar(Grid, MapMaxX, MapMaxY).isPossiblePathExisting(UnitPosition, NearbyPosition))
-				{
-					return NearbyPosition;
-				}
+				CurrentOffset = MinOffset;
+				FinalPositions.Empty();
+				FinalPositions.Add(Position);
+			}
+			else if (CurrentOffset == MinOffset)
+			{
+				FinalPositions.Add(Position);
 			}
 		}
 	}
-
-	return UnitPosition;
+	
+	return FinalPositions[FMath::Rand() % FinalPositions.Num()];
 }
 
 FPosition AAIPlayer::GetPositionCloseToObjective()
 {
-	int32 CurrentOffset;
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, "Unit is moving to objective");
+
 	int32 IndexMax;
-	FPosition FinalPosition;
+	int32 CurrentOffset;
 
-	int32 MaxOffset = 0;
-	TArray<FPosition> PossiblePositions = GetNearbyPositions(TargetPosition);
+	int32 MinOffset = TNumericLimits<int32>::Max();
+	TArray<FPosition> PossiblePositions = {UnitPosition};
+	TArray<FPosition> BestPositions;
 
-	for (int32 Depth = 1; Depth < Unit->MaxAttackDepth; Depth++)
+	for (int32 Depth = 0; Depth < Unit->Energy / Unit->MovementCost; Depth++)
 	{
 		IndexMax = PossiblePositions.Num();
 		
@@ -154,30 +165,26 @@ FPosition AAIPlayer::GetPositionCloseToObjective()
 		{
 			for (const auto& Position : GetNearbyPositions(PossiblePositions[Index]))
 			{
-				PossiblePositions.AddUnique(Position);
+				if (Grid->At(Position)->State == ETileState::TS_Empty)
+				{
+					PossiblePositions.AddUnique(Position);
+					CurrentOffset = Offset(Position, TargetPosition);
+					if (CurrentOffset < MinOffset)
+					{
+						MinOffset = CurrentOffset;
+						BestPositions.Empty();
+						BestPositions.AddUnique(Position);
+					}
+					else if (CurrentOffset == MinOffset)
+					{
+						BestPositions.AddUnique(Position);
+					}
+				}
 			}
 		}
 	}
 
-	for (const auto& Position : PossiblePositions)
-	{
-		if (Grid->At(Position)->State == ETileState::TS_Empty
-			&&
-			AStar(Grid, MapMaxX, MapMaxX).isPossiblePathExisting(UnitPosition, Position))
-		{
-			CurrentOffset = Offset(UnitPosition, Position);
-
-			if (CurrentOffset > MaxOffset
-				&&
-				MaxOffset <= Unit->MaxAttackDepth)
-			{
-				MaxOffset = CurrentOffset;
-				FinalPosition = Position;
-			}
-		}
-	}
-	
-	return FinalPosition;
+	return BestPositions[FMath::Rand() % BestPositions.Num()];
 }
 
 FPosition AAIPlayer::GetPositionFromPath(const TArray<EDirectionEnum>& Path)
@@ -232,8 +239,7 @@ void AAIPlayer::AttackWeakestEnemyNearby()
 
 void AAIPlayer::Attack(const FPosition& Position)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, FString::Printf(TEXT("Unit at [%d, %d] is attacking [%d, %d]"),
-		UnitPosition.Row, UnitPosition.Column, Position.Row, Position.Column));
+
 	while (	Grid->At(Position)->Ocupant != nullptr
 			&&
 			Unit->Energy >= Unit->AttackCost)
@@ -252,47 +258,70 @@ void AAIPlayer::MoveTowards(const FPosition& Position)
 	FPosition FinalPosition;
 
 	const int32 MaxDepth		=	(Unit->Energy / Unit->MovementCost);
-	TArray<EDirectionEnum> Path =	GridPathfinder::GetPath(Unit->Location, Grid->At(Position), TNumericLimits<int32>::Max(), Grid);
-
-	while (Path.Num() > MaxDepth)
-	{
-		Path.RemoveAt(Path.Num() - 1);
-	}
+	TArray<EDirectionEnum> Path =	GridPathfinder::GetPath(Unit->Location, Grid->At(Position), MaxDepth, Grid);
 
 	FinalPosition = GetPositionFromPath(Path);
 	UnitPosition = FinalPosition;
 
-	if (Grid->Tiles.Contains(FinalPosition))
+	if (Grid->Tiles.Contains(FinalPosition) && Path.Num() > 0)
 	{
 		Unit->MoveTo(Grid->At(FinalPosition));
 	}
+
+	UnitPosition = Grid->GetPosition(Unit->Location);
 }
 
 void AAIPlayer::MoveTowardsObjective()
 {
-	if (bCanReachObjective())
-	{
-		MoveTowards(GetPositionCloseToObjective());
-	}
-	else
-	{
-		MoveTowards(GetRegroupPosition());
-	}
+	const FPosition FinalPosition = bCanReachObjective()
+		? GetPositionCloseToObjective()
+		: GetSideObjective();
+
+	MoveTowards(FinalPosition);
 }
 
 void AAIPlayer::FindNewObjective()
 {
-	EnemyPositions = GetEnemyPositions();
+	int32 CurrentOffset;
 
+	TArray<FPosition> PossiblePositions;
+	TArray<FPosition> FinalPositions;
+
+	int32 MinOffset = TNumericLimits<int32>::Max();
 	int32 MinHealth = TNumericLimits<int32>::Max();
+
+	EnemyPositions = GetEnemyPositions();
 
 	for (const auto& Position : EnemyPositions)
 	{
 		if (Grid->At(Position)->Ocupant->Health < MinHealth)
 		{
-			TargetPosition = Position;
+			MinHealth = Grid->At(Position)->Ocupant->Health;
+			PossiblePositions.Empty();
+			PossiblePositions.Add(Position);
+		}
+		else if (Grid->At(Position)->Ocupant->Health == MinHealth)
+		{
+			PossiblePositions.Add(Position);
 		}
 	}
+
+	for (const auto& Position : PossiblePositions)
+	{
+		CurrentOffset = Offset(Position, UnitPosition);
+		if (CurrentOffset < MinOffset)
+		{
+			CurrentOffset = MinOffset;
+			FinalPositions.Empty();
+			FinalPositions.Add(Position);
+		}
+		else if (CurrentOffset == MinOffset)
+		{
+			FinalPositions.Add(Position);
+		}
+	}
+
+	TargetPosition = FinalPositions[FMath::Rand() % FinalPositions.Num()];
 }
 
 bool AAIPlayer::bCanReachObjective()

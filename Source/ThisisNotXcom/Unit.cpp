@@ -73,10 +73,10 @@ bool AUnit::bIsTileReachable(ATile* Tile) const
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGrid::StaticClass(), FoundActors);
 	Grid = Cast<AGrid>(FoundActors[0]);
 
-	MyPosition = Grid->GetPosition(Location);
-	TargetPosition = Grid->GetPosition(Tile);
-	HeightOffset = MyPosition.Row - TargetPosition.Row;
-	WidthOffset = MyPosition.Column - TargetPosition.Column;
+	MyPosition		=	Grid->GetPosition(Location);
+	TargetPosition	=	Grid->GetPosition(Tile);
+	HeightOffset	=	FMath::Abs(MyPosition.Row - TargetPosition.Row);
+	WidthOffset		=	FMath::Abs(MyPosition.Column - TargetPosition.Column);
 
 	return HeightOffset + WidthOffset <= MaxAttackDepth;
 }

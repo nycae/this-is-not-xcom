@@ -1,5 +1,0 @@
-SomePlayer 50
-AnotherPlayer 200
-YetAnotherPlayer 150
-EvenAnotherPlayer 125
-Me 250

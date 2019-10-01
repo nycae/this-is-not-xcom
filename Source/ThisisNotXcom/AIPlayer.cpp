@@ -85,9 +85,9 @@ TArray<FPosition> AAIPlayer::GetEnemyPositions()
 {
 	TArray<FPosition> UnitPositions = Grid->GetOccupiedPositions();
 
-	for (const auto& Unit : Team->Army)
+	for (const auto& AllyUnit : Team->Army)
 	{
-		UnitPositions.Remove(Grid->GetPosition(Unit->Location));
+		UnitPositions.Remove(Grid->GetPosition(AllyUnit->Location));
 	}
 
 	return UnitPositions;

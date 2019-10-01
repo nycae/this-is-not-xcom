@@ -66,6 +66,7 @@ void ATeamLeader::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	InputComponent->BindAction("RightMouse", IE_Pressed, this, &ATeamLeader::HideCursor);
 	InputComponent->BindAction("RightMouse", IE_Released, this, &ATeamLeader::DisplayCursor);
 	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ATeamLeader::FinishTurn);
+	InputComponent->BindTouch(IE_Pressed, this, &ATeamLeader::AttendTap);
 	//InputComponent->BindAction("ResetTurn", IE_Pressed, this, &ATeamLeader::FinishTurn);
 }
 
@@ -203,6 +204,28 @@ void ATeamLeader::AttendHitResult(AActor* Result)
 	}
 }
 
+void ATeamLeader::AttendTap(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	FHitResult HitResult;
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (PlayerController)
+	{
+		PlayerController->GetHitResultUnderFinger(FingerIndex, ECC_Visibility, false, HitResult);
+
+		if (HitResult.GetActor() != nullptr)
+		{
+			AttendHitResult(HitResult.GetActor());
+		}
+		else
+		{
+			SelectedTile = nullptr;
+			ObjectiveTile = nullptr;
+		}
+	}
+}
+
 void ATeamLeader::OnClick()
 {
 	if (bIsInLookMode)
@@ -239,36 +262,6 @@ void ATeamLeader::OnEndOfAction()
 	ObjectiveTile->ToggleObjective();
 	SelectedTile = nullptr;
 }
-
-/*
-AUnit* ATeamLeader::SpawnUnit(EUnitTypeEnum UnitClass)
-{
-	if (!SelectedTile.IsValid())
-	{
-		return nullptr;
-	}
-
-	if (!UnitSpawnCount.Contains(UnitClass))
-	{
-		UnitSpawnCount.Add(UnitClass, 0);
-	}
-
-	if (UnitSpawnCount[UnitClass] >= UnitManager->UnitCount[UnitClass])
-	{
-		return nullptr;
-	}
-	
-	FVector Location = SelectedTile->GetActorLocation();
-	AUnit* Unit = (AUnit*) GetWorld()->SpawnActor(UnitManager->UnitClasses[UnitClass], &Location);
-
-	Unit->Team = this;
-	Unit->Location = SelectedTile.Get();
-
-	UnitSpawnCount[UnitClass]++;
-
-	return Unit;
-}
-*/
 
 void ATeamLeader::SwitchCamera(ACameraActor* NewCamera)
 {

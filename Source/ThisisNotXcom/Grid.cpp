@@ -127,11 +127,6 @@ void AGrid::AddOcupantAt(AUnit* NewOcupant, const FPosition& Position)
 	{
 		Tiles[Position]->Ocupant = NewOcupant;
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Esa posición no existe");
-	}
-
 }
 
 FPosition AGrid::GetPosition(const ATile* Tile) const
@@ -152,10 +147,6 @@ void AGrid::ObstructPosition(const FPosition& Position)
 	if (Tiles.Contains(Position))
 	{
 		Tiles[Position]->State = ETileState::TS_Obstructed;
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Position [%d, %d] does not exist"), Position.Row, Position.Column));
 	}
 }
 

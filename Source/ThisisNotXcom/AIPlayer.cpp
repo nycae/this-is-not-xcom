@@ -51,14 +51,13 @@ void AAIPlayer::TimerForDelayedExecution(TArray<AUnit*> Units)
 	if (Units.Num())
 	{
 		BindedFunction.BindUFunction(this, FName("TimerForDelayedExecution"), Units);
-		GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 1.0f);
 	}
 	else
 	{
 		BindedFunction.BindUFunction(Team, FName("FinishTurn"), Units);
-		GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 1.0f);
 	}
-	
+
+	GetWorldTimerManager().SetTimer(UnusedHandle, BindedFunction, 1.0f, false, 1.0f);
 }
 
 void AAIPlayer::GoForTheWeakest(AUnit* ArgUnit)

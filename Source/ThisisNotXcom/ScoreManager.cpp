@@ -14,7 +14,7 @@ UScoreManager::UScoreManager()
 		if (FFileHelper::LoadFileToString(File, *(FPaths::ProjectDir() + "/Scores.txt")))
 		{
 			TArray<FString> Lines;
-			File.ParseIntoArray(Lines, _T("\n"), true);
+			File.ParseIntoArray(Lines, *FString("\n"), true);
 
 			for (const auto& Line : Lines) 
 			{
@@ -38,7 +38,7 @@ UScoreManager::~UScoreManager()
 
 	for (const auto& Pair : Scores)
 	{
-		FileData.Append(Pair.Key + " ");
+		FileData.Append(Pair.Key.Replace(*FString(" "), *FString("-")) + " ");
 		FileData.AppendInt(Pair.Value);
 		FileData.Append("\n");
 	}

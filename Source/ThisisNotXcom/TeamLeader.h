@@ -40,6 +40,8 @@ public:
 
 	void RotateRight(float Value);
 
+	void AttendTap(ETouchIndex::Type FingerIndex, FVector Location);
+
 	void OnClick();
 
 	void HideCursor();

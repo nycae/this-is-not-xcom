@@ -117,11 +117,11 @@ void AThisisNotXcomGameMode::AttendNewTurn(ATeamLeader* Team)
 	{
 		ATeamLeader* PossibleWinner = TurnHolder;
 
-		for (ATeamLeader* Team : Teams)
+		for (ATeamLeader* PossibleTeam : Teams)
 		{
-			if (Team->HealthOfUnits() > PossibleWinner->HealthOfUnits())
+			if (PossibleTeam->HealthOfUnits() > PossibleWinner->HealthOfUnits())
 			{
-				PossibleWinner = Team;
+				PossibleWinner = PossibleTeam;
 			}
 		}
 
